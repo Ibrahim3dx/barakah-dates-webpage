@@ -10,7 +10,7 @@ const Footer = () => {
           <div>
             <h3 className="font-arabic text-xl font-bold mb-4 text-right">البركة للتمور</h3>
             <p className="font-arabic text-sm text-white/80 mb-4 text-right">
-              شركة سعودية رائدة في مجال إنتاج وتصنيع وتسويق أجود أنواع التمور ومنتجات النخيل، تتميز بالجودة العالية والأصالة والابتكار.
+              شركة ليبية رائدة في مجال إنتاج وتصنيع وتسويق أجود أنواع التمور ومنتجات النخيل، تتميز بالجودة العالية والأصالة والابتكار.
             </p>
             <div className="flex space-x-4 justify-end">
               <a href="#" className="text-white/80 hover:text-dates-amber transition-colors">
