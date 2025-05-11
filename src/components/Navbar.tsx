@@ -35,7 +35,11 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <a href="#hero" className="flex items-center">
-              <span className="font-arabic font-bold text-lg md:text-xl text-dates-brown">البركة للتمور</span>
+              <img 
+                src="/lovable-uploads/4ef50073-65cc-41e8-bd62-46915e10ccfc.png" 
+                alt="البركة للتمور" 
+                className="h-12 md:h-16" 
+              />
             </a>
           </div>
           
