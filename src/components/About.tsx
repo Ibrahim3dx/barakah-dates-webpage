@@ -1,10 +1,7 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { History, Leaf, Award, Gift } from "lucide-react";
-
 const About = () => {
-  return (
-    <section id="about" className="section-padding bg-secondary">
+  return <section id="about" className="section-padding bg-secondary">
       <div className="container mx-auto container-padding">
         <div className="text-center mb-12">
           <h2 className="font-arabic text-3xl md:text-4xl font-bold mb-4">من نحن</h2>
@@ -13,12 +10,8 @@ const About = () => {
         
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
-            <p className="font-arabic text-lg leading-relaxed text-right">
-              تأسست شركة البركة للتمور ومنتجات النخيل في عام 1985 في قلب المملكة العربية السعودية، منطقة القصيم المعروفة بجودة تمورها وأصالة نخيلها.
-            </p>
-            <p className="font-arabic text-lg leading-relaxed text-right">
-              بدأنا رحلتنا بمزارع محدودة، وتوسعنا على مر السنين لنصبح من أكبر منتجي التمور في المنطقة، حيث نمتلك الآن أكثر من 10,000 نخلة من أجود الأصناف.
-            </p>
+            <p className="font-arabic text-lg leading-relaxed text-right">تأسست شركة البركة للتمور ومنتجات النخيل في عام 2018 في قلب ليبيا ، منطقة الجفرة المعروفة بجودة تمورها وأصالة نخيلها.</p>
+            <p className="font-arabic text-lg leading-relaxed text-right">بدأنا رحلتنا بمزارع محدودة، وتوسعنا على مر السنين لنصبح من أكبر منتجي التمور في المنطقة، .</p>
             <p className="font-arabic text-lg leading-relaxed text-right">
               نفخر بتقديم تمور عالية الجودة وكذلك منتجات مشتقة من النخيل تحافظ على تراثنا العربي الأصيل مع مراعاة أعلى معايير الجودة والإنتاج المستدام.
             </p>
@@ -31,7 +24,7 @@ const About = () => {
                   <History className="h-8 w-8 text-dates-amber" />
                 </div>
                 <h3 className="font-arabic font-bold text-xl mb-2">تراث وأصالة</h3>
-                <p className="font-arabic text-muted-foreground">أكثر من 35 عاماً من الخبرة في مجال التمور</p>
+                <p className="font-arabic text-muted-foreground">أكثر من 10 سنوات من الخبرة في مجال التمور</p>
               </CardContent>
             </Card>
             
@@ -67,8 +60,6 @@ const About = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default About;

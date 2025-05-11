@@ -1,9 +1,6 @@
-
 import { Button } from '@/components/ui/button';
-
 const Hero = () => {
-  return (
-    <section id="hero" className="relative min-h-screen flex items-center">
+  return <section id="hero" className="relative min-h-screen flex items-center">
       {/* Background Image */}
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151')] bg-cover bg-center">
         <div className="absolute inset-0 bg-black/50"></div>
@@ -15,9 +12,7 @@ const Hero = () => {
           <h1 className="font-arabic text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
             البركة للتمور ومنتجات النخيل
           </h1>
-          <p className="font-arabic text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto">
-            أجود أنواع التمور والمنتجات المشتقة من النخيل، من قلب المملكة العربية السعودية إلى العالم
-          </p>
+          <p className="font-arabic text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto">أجود أنواع التمور والمنتجات المشتقة من النخيل، من قلب الجفرة إلى العالم</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" className="font-arabic text-lg bg-dates-amber hover:bg-dates-gold text-white">
               تصفح منتجاتنا
@@ -36,8 +31,6 @@ const Hero = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
