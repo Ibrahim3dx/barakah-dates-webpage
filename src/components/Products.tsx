@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Palm, Bottle, Honey, Olive, Package, ShoppingBag } from "lucide-react";
+import { Package, ShoppingBag, Leaf, Droplet, Coffee } from "lucide-react";
 
 // Categories and their products
 const productCategories = [
@@ -33,7 +33,7 @@ const productCategories = [
   {
     id: "palms",
     name: "فسائل النخيل",
-    icon: <Palm className="h-5 w-5" />,
+    icon: <Leaf className="h-5 w-5" />,
     products: [
       { name: "دقلة نور", description: "فسائل نخيل دقلة نور الأصلية عالية الجودة" },
       { name: "خضراي", description: "فسائل نخيل خضراي ذات إنتاجية عالية" },
@@ -49,7 +49,7 @@ const productCategories = [
   {
     id: "honey",
     name: "أنواع العسل",
-    icon: <Honey className="h-5 w-5" />,
+    icon: <Droplet className="h-5 w-5" />,
     products: [
       { name: "عسل السدر", description: "عسل سدر أصلي 100% من أجود أنواع العسل العربي" },
       { name: "الخلط", description: "مزيج مختار من أنواع العسل المتعددة" },
@@ -71,7 +71,7 @@ const productCategories = [
   {
     id: "olive",
     name: "منتجات الزيتون",
-    icon: <Olive className="h-5 w-5" />,
+    icon: <Coffee className="h-5 w-5" />,
     products: [
       { name: "زيت زيتون بكر ممتاز", description: "زيت زيتون عضوي معصور على البارد" },
       { name: "زيتون أخضر", description: "زيتون أخضر طازج محفوظ بطريقة طبيعية" },
@@ -131,9 +131,9 @@ const Products = () => {
               <div className="h-48 overflow-hidden bg-dates-cream/30 flex items-center justify-center">
                 <div className="text-6xl text-dates-amber opacity-20 transform group-hover:scale-110 transition-transform duration-500">
                   {activeCategory === "dates" && <ShoppingBag />}
-                  {activeCategory === "palms" && <Palm />}
-                  {activeCategory === "honey" && <Honey />}
-                  {activeCategory === "olive" && <Olive />}
+                  {activeCategory === "palms" && <Leaf />}
+                  {activeCategory === "honey" && <Droplet />}
+                  {activeCategory === "olive" && <Coffee />}
                   {activeCategory === "farm" && <Package />}
                 </div>
               </div>
