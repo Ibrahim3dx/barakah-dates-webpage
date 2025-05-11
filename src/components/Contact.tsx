@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,49 +14,49 @@ const Contact = () => {
             نسعد بتواصلكم معنا للاستفسار عن منتجاتنا أو طلب عروض الأسعار أو للتعاون التجاري
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-10">
           {/* Contact Form */}
           <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
             <h3 className="font-arabic text-2xl font-bold mb-6 text-right">ارسل رسالة</h3>
-            
+
             <form className="space-y-5">
               <div>
                 <label htmlFor="name" className="font-arabic block text-sm font-medium text-right mb-1">
                   الاسم الكامل
                 </label>
-                <Input 
-                  id="name" 
-                  type="text" 
-                  placeholder="أدخل اسمك الكامل" 
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="أدخل اسمك الكامل"
                   className="font-arabic text-right"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="font-arabic block text-sm font-medium text-right mb-1">
                   البريد الإلكتروني
                 </label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="أدخل بريدك الإلكتروني" 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="أدخل بريدك الإلكتروني"
                   className="font-arabic text-right"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="phone" className="font-arabic block text-sm font-medium text-right mb-1">
                   رقم الهاتف
                 </label>
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  placeholder="أدخل رقم الهاتف" 
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="أدخل رقم الهاتف"
                   className="font-arabic text-right"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="message" className="font-arabic block text-sm font-medium text-right mb-1">
                   الرسالة
@@ -68,7 +67,7 @@ const Contact = () => {
                   className="font-arabic text-right min-h-[120px]"
                 />
               </div>
-              
+
               <div className="text-right">
                 <Button type="submit" className="font-arabic bg-dates-amber hover:bg-dates-gold">
                   إرسال الرسالة
@@ -76,11 +75,11 @@ const Contact = () => {
               </div>
             </form>
           </div>
-          
+
           {/* Contact Information */}
           <div>
             <h3 className="font-arabic text-2xl font-bold mb-6 text-right">معلومات التواصل</h3>
-            
+
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <div className="mt-1 text-dates-amber">
@@ -88,13 +87,13 @@ const Contact = () => {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-arabic font-bold mb-1 text-right">الهاتف</h4>
-                  <p className="font-arabic text-muted-foreground text-right">
-                    +966 123 456 789<br />
-                    +966 987 654 321
+                  <p className="font-arabic text-muted-foreground text-right" dir="ltr">
+                    +218920911909 <br />
+                    +218910911909
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="mt-1 text-dates-amber">
                   <Mail className="h-5 w-5" />
@@ -107,7 +106,7 @@ const Contact = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="mt-1 text-dates-amber">
                   <MapPin className="h-5 w-5" />
@@ -115,12 +114,12 @@ const Contact = () => {
                 <div className="flex-1">
                   <h4 className="font-arabic font-bold mb-1 text-right">العنوان</h4>
                   <p className="font-arabic text-muted-foreground text-right">
-                    طريق الملك عبدالعزيز، حي الشهداء<br />
-                    بريدة، القصيم، المملكة العربية السعودية
+                  طرابلس ، سوق الجمعة ، بجوار جامع التركي<br />
+                  الجفرة ، هون ، مقابل الجزيرة الخارجية
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="mt-1 text-dates-amber">
                   <Clock className="h-5 w-5" />
@@ -128,17 +127,17 @@ const Contact = () => {
                 <div className="flex-1">
                   <h4 className="font-arabic font-bold mb-1 text-right">ساعات العمل</h4>
                   <p className="font-arabic text-muted-foreground text-right">
-                    الأحد - الخميس: 8:00 صباحاً - 5:00 مساءً<br />
-                    الجمعة - السبت: مغلق
+                  السبت - الخميس: 8:00 ص- 8:00 م<br />
+                  الجمعة: 3:00 م - 8:00 م
                   </p>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-8">
               <h4 className="font-arabic font-bold mb-4 text-right">تابعنا على</h4>
               <div className="flex justify-end gap-4">
-                <a href="#" className="w-10 h-10 bg-dates-amber text-white flex items-center justify-center rounded-full hover:bg-dates-gold transition-colors">
+                <a href="https://www.facebook.com/albaraka.dates.aljufra" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-dates-amber text-white flex items-center justify-center rounded-full hover:bg-dates-gold transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 512 512">
                     <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z" fill="currentColor" />
                   </svg>

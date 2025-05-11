@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -31,7 +30,7 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          
+
           {/* Quick Links */}
           <div>
             <h3 className="font-arabic text-xl font-bold mb-4 text-right">روابط سريعة</h3>
@@ -53,18 +52,18 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           {/* Contact Info */}
           <div>
             <h3 className="font-arabic text-xl font-bold mb-4 text-right">معلومات التواصل</h3>
             <ul className="space-y-3 text-right">
               <li className="font-arabic text-white/80">
-                <span className="block">طريق الملك عبدالعزيز، حي الشهداء</span>
-                <span className="block">بريدة، القصيم، المملكة العربية السعودية</span>
+                <span className="block">طرابلس ، سوق الجمعة ، بجوار جامع التركي</span>
+                <span className="block">الجفرة ، هون ، مقابل الجزيرة الخارجية</span>
               </li>
-              <li className="font-arabic text-white/80">
-                <span className="block">هاتف: 789 456 123 966+</span>
-                <span className="block">فاكس: 000 456 123 966+</span>
+              <li className="font-arabic text-white/80" dir="ltr">
+                <span className="block">+218920911909</span>
+                <span className="block">+218910911909</span>
               </li>
               <li className="font-arabic text-white/80">
                 <span className="block">info@albarakadates.com</span>
@@ -72,7 +71,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           {/* Newsletter */}
           <div>
             <h3 className="font-arabic text-xl font-bold mb-4 text-right">النشرة البريدية</h3>
@@ -80,9 +79,9 @@ const Footer = () => {
               اشترك في نشرتنا البريدية للحصول على آخر الأخبار والعروض الحصرية
             </p>
             <div className="flex flex-col space-y-2">
-              <Input 
-                type="email" 
-                placeholder="البريد الإلكتروني" 
+              <Input
+                type="email"
+                placeholder="البريد الإلكتروني"
                 className="font-arabic text-right bg-white/10 border-white/20 placeholder-white/50 text-white"
               />
               <Button className="font-arabic bg-dates-amber hover:bg-dates-gold text-white w-full">
@@ -91,9 +90,9 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        
+
         <hr className="border-white/20 my-8" />
-        
+
         <div className="text-center">
           <p className="font-arabic text-sm text-white/80">
             © 2025 جميع الحقوق محفوظة لشركة البركة للتمور ومنتجات النخيل
