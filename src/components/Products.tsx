@@ -1,167 +1,178 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Search, ShoppingCart } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { useCart } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { toast } from 'sonner';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Package, ShoppingBag, Leaf, Droplet, Coffee } from "lucide-react";
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  stock: number;
+  category: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+  attributes: {
+    weight?: string;
+    volume?: string;
+    origin?: string;
+    shelf_life?: string;
+    harvest_date?: string;
+    ingredients?: string;
+  };
+}
 
-// Categories and their products
-const productCategories = [
-  {
-    id: "dates",
-    name: "التمور بأنواعها",
-    icon: <ShoppingBag className="h-5 w-5" />,
-    products: [
-      { name: "تمر دقلة رطب (فرز أول)", description: "تمور طازجة ذات مذاق حلو ورطوبة مثالية" },
-      { name: "تمر دقلة نصف جافة", description: "تمور متوسطة الرطوبة بمذاق مركز" },
-      { name: "تمر دقلة شمراخ", description: "تمور على العرجون بجودة عالية" },
-      { name: "تمر آبل", description: "تمور منتقاة ذات حجم كبير ومذاق مميز" },
-      { name: "تمر دقلة حمراء (عليق)", description: "تمور ذات لون مائل للحمرة ومذاق فريد" },
-      { name: "تمر صعيدي", description: "تمور جنوبية ذات نكهة قوية ومميزة" },
-      { name: "تمر تاليس", description: "تمور ذهبية اللون بطعم كراميل طبيعي" },
-      { name: "عجوة المدينة النبوية", description: "تمور المدينة المنورة الأصلية، عبوات 0.50 كيلو" },
-      { name: "تمر مجهول", description: "ملك التمور بحجمه الكبير ومذاقه الفاخر، عبوات 0.50 كيلو" },
-      { name: "تمر حليمة", description: "تمور ناعمة ذات مذاق مميز، عبوات 0.50 كيلو" },
-      { name: "تمر برميل", description: "تمور ذات قيمة غذائية عالية، عبوات 0.50 كيلو" },
-      { name: "تمر دقلة فرز أول", description: "تمور منتقاة بعناية، متوفرة بأحجام مختلفة" },
-      { name: "تمر معجون", description: "عجينة تمر طبيعية 100% بدون إضافات، متوفرة بأحجام مختلفة" },
-      { name: "تمر معجون باللوز", description: "عجينة تمر فاخرة محشوة باللوز الطازج" },
-      { name: "تمر معجون بالبندق", description: "عجينة تمر فاخرة محشوة بالبندق الطازج" },
-      { name: "تمر معجون بالسمسم", description: "عجينة تمر فاخرة مع السمسم المحمص" },
-      { name: "تمر معجون بالكاكاوية", description: "عجينة تمر فاخرة محشوة بالفول السوداني" },
-    ]
-  },
-  {
-    id: "palms",
-    name: "فسائل النخيل",
-    icon: <Leaf className="h-5 w-5" />,
-    products: [
-      { name: "دقلة نور", description: "فسائل نخيل دقلة نور الأصلية عالية الجودة" },
-      { name: "خضراي", description: "فسائل نخيل خضراي ذات إنتاجية عالية" },
-      { name: "صعيدي", description: "فسائل نخيل صعيدي أصلية من جنوب المنطقة" },
-      { name: "تغيات", description: "فسائل نخيل تغيات المعروفة بتحملها للظروف القاسية" },
-      { name: "حليمة", description: "فسائل نخيل حليمة ذات ثمار طرية ولذيذة" },
-      { name: "مجهول", description: "فسائل نخيل مجهول الفاخرة" },
-      { name: "برحي", description: "فسائل نخيل برحي المعروفة بحلاوة تمورها وقيمتها الغذائية" },
-      { name: "صقعي", description: "فسائل نخيل صقعي المقاومة للجفاف" },
-      { name: "فحل غنامي", description: "فسائل نخيل فحل غنامي عالي الإنتاجية" },
-    ]
-  },
-  {
-    id: "honey",
-    name: "أنواع العسل",
-    icon: <Droplet className="h-5 w-5" />,
-    products: [
-      { name: "عسل السدر", description: "عسل سدر أصلي 100% من أجود أنواع العسل العربي" },
-      { name: "الخلط", description: "مزيج مختار من أنواع العسل المتعددة" },
-      { name: "الزعتر", description: "عسل زعتر أصلي ذو فوائد صحية عالية" },
-      { name: "الدرياس", description: "عسل الدرياس النادر بمذاقه المميز" },
-      { name: "اللبد", description: "عسل لبد صافي بلون ذهبي" },
-      { name: "الحنون", description: "عسل الحنون ذو الرائحة المميزة" },
-      { name: "الشوكيات", description: "عسل من أزهار الشوكيات البرية" },
-      { name: "الأثل", description: "عسل الأثل الأصلي والنادر" },
-      { name: "الربيع", description: "عسل أزهار الربيع المتنوعة" },
-      { name: "السرول", description: "عسل السرول النقي من الجبال" },
-      { name: "البرسيم", description: "عسل البرسيم ذو اللون الفاتح والطعم الرقيق" },
-      { name: "مغذى", description: "عسل مغذى طبيعي لتعزيز المناعة" },
-      { name: "عسل مغذى بالمكسرات", description: "عسل طبيعي معزز بمزيج المكسرات المغذية" },
-      { name: "عسل سدر بالمكسرات", description: "عسل سدر أصلي مع مكسرات منتقاة" },
-      { name: "شمع النحل (الشهد)", description: "شمع نحل طبيعي 100% مع العسل" },
-    ]
-  },
-  {
-    id: "olive",
-    name: "منتجات الزيتون",
-    icon: <Coffee className="h-5 w-5" />,
-    products: [
-      { name: "زيت زيتون بكر ممتاز", description: "زيت زيتون عضوي معصور على البارد" },
-      { name: "زيتون أخضر", description: "زيتون أخضر طازج محفوظ بطريقة طبيعية" },
-      { name: "زيتون أسود", description: "زيتون أسود ناضج بطعم غني" },
-      { name: "زيتون متبل", description: "زيتون متبل بالأعشاب والتوابل الطبيعية" },
-    ]
-  },
-  {
-    id: "farm",
-    name: "منتجات السانية",
-    icon: <Package className="h-5 w-5" />,
-    products: [
-      { name: "منتجات السانية المتنوعة", description: "منتجات طبيعية مختارة من مزرعتنا الخاصة" },
-    ]
-  },
-];
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  image_url: string;
+}
 
 const Products = () => {
-  const [activeCategory, setActiveCategory] = useState("dates");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const { addToCart } = useCart();
+  const { t } = useLanguage();
 
-  // Filter products based on active category
-  const displayProducts = productCategories.find(cat => cat.id === activeCategory)?.products || [];
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      return response.json();
+    },
+  });
+
+  const { data: products, isLoading } = useQuery<Product[]>({
+    queryKey: ['products', searchQuery, selectedCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedCategory) params.append('category_id', selectedCategory.toString());
+      
+      const response = await fetch(`/api/products?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      return response.json();
+    },
+  });
+
+  const handleAddToCart = (product: Product) => {
+    if (product.stock <= 0) {
+      toast.error(t('products.outOfStock'));
+      return;
+    }
+    addToCart(product);
+    toast.success(`${product.name} ${t('products.addedToCart')}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
-    <section id="products" className="section-padding bg-background">
-      <div className="container mx-auto container-padding">
-        <div className="text-center mb-12">
-          <h2 className="font-arabic text-3xl md:text-4xl font-bold mb-4">منتجاتنا</h2>
-          <div className="w-24 h-1 bg-dates-amber mx-auto mb-6"></div>
-          <p className="font-arabic text-lg text-muted-foreground max-w-2xl mx-auto">
-            نقدم مجموعة متنوعة من أجود أنواع التمور ومنتجات النخيل والعسل والزيتون، بعناية فائقة لضمان أعلى مستويات الجودة
-          </p>
-        </div>
-
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {productCategories.map((category) => (
-            <Button 
-              key={category.id} 
-              variant={activeCategory === category.id ? "default" : "outline"} 
-              className={`font-arabic text-sm md:text-base flex gap-2 items-center ${
-                activeCategory === category.id 
-                ? "bg-dates-amber hover:bg-dates-gold" 
-                : "border-dates-brown text-dates-brown hover:bg-dates-brown/10"
-              }`}
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {category.icon}
-              {category.name}
-            </Button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayProducts.map((product, index) => (
-            <Card key={index} className="overflow-hidden group hover:shadow-lg transition-shadow border-dates-tan">
-              <div className="h-48 overflow-hidden bg-dates-cream/30 flex items-center justify-center">
-                <div className="text-6xl text-dates-amber opacity-20 transform group-hover:scale-110 transition-transform duration-500">
-                  {activeCategory === "dates" && <ShoppingBag />}
-                  {activeCategory === "palms" && <Leaf />}
-                  {activeCategory === "honey" && <Droplet />}
-                  {activeCategory === "olive" && <Coffee />}
-                  {activeCategory === "farm" && <Package />}
-                </div>
-              </div>
-              <CardContent className="p-6">
-                <div className="mb-2">
-                  <span className="text-xs font-arabic text-dates-amber bg-dates-amber/10 py-1 px-2 rounded-full">
-                    {productCategories.find(cat => cat.id === activeCategory)?.name}
-                  </span>
-                </div>
-                <h3 className="font-arabic text-xl font-bold mb-2 text-right">{product.name}</h3>
-                <p className="font-arabic text-muted-foreground mb-4 text-right">{product.description}</p>
-                <div className="text-right">
-                  <Button variant="outline" className="font-arabic border-dates-brown text-dates-brown hover:bg-dates-brown hover:text-white">
-                    طلب المنتج
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        <div className="text-center mt-10">
-          <Button size="lg" className="font-arabic text-lg bg-dates-amber hover:bg-dates-gold">
-            اطلب منتجاتنا الآن
-          </Button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold mb-4 md:mb-0">{t('products.title')}</h1>
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder={t('products.search')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <select
+            value={selectedCategory || ''}
+            onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
+            className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">{t('products.categories')}</option>
+            {categories?.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products?.map((product) => (
+          <div
+            key={product.id}
+            className="bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-xl font-semibold">{product.name}</h2>
+                <span className="text-sm text-gray-500">{product.category.name}</span>
+              </div>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                {product.description}
+              </p>
+              <div className="space-y-2 mb-4">
+                {product.attributes.weight && (
+                  <p className="text-sm text-gray-500">
+                    {t('products.attributes.weight')}: {product.attributes.weight}
+                  </p>
+                )}
+                {product.attributes.volume && (
+                  <p className="text-sm text-gray-500">
+                    {t('products.attributes.volume')}: {product.attributes.volume}
+                  </p>
+                )}
+                {product.attributes.origin && (
+                  <p className="text-sm text-gray-500">
+                    {t('products.attributes.origin')}: {product.attributes.origin}
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-xl font-bold">${product.price}</span>
+                  {product.stock <= 0 && (
+                    <span className="ml-2 text-sm text-red-500">{t('products.outOfStock')}</span>
+                  )}
+                </div>
+                <Button
+                  onClick={() => handleAddToCart(product)}
+                  className="flex items-center gap-2"
+                  disabled={product.stock <= 0}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  {t('products.addToCart')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 

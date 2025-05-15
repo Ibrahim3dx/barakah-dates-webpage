@@ -1,99 +1,85 @@
-
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Link, Outlet } from 'react-router-dom';
+import { ShoppingCart, User, LogOut, Globe } from 'lucide-react';
+import { Button } from './ui/button';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { user, logout } = useAuth();
+  const { totalItems } = useCart();
+  const { language, setLanguage, t } = useLanguage();
 
-  const navItems = [
-    { name: 'الرئيسية', href: '#hero' },
-    { name: 'من نحن', href: '#about' },
-    { name: 'منتجاتنا', href: '#products' },
-    { name: 'الجودة', href: '#quality' },
-    { name: 'تواصل معنا', href: '#contact' }
-  ];
+  const toggleLanguage = () => {
+    setLanguage(language === 'ar' ? 'en' : 'ar');
+  };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-background/95 backdrop-blur shadow-md' : 'bg-transparent'
-      }`}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <a href="#hero" className="flex items-center">
-              <img 
-                src="/lovable-uploads/4ef50073-65cc-41e8-bd62-46915e10ccfc.png" 
-                alt="البركة للتمور" 
-                className="h-12 md:h-16" 
-              />
-            </a>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:block">
-            <ul className="flex space-x-8">
-              {navItems.map((item, index) => (
-                <li key={index}>
-                  <a 
-                    href={item.href} 
-                    className="font-arabic text-foreground hover:text-dates-brown transition-colors text-sm font-medium"
+    <>
+      <nav className="bg-white shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="text-xl font-bold">
+              Barakah Dates
+            </Link>
+
+            <div className="flex items-center gap-4">
+              <Link to="/products" className="text-gray-600 hover:text-gray-900">
+                {t('nav.products')}
+              </Link>
+
+              <Link to="/cart" className="relative">
+                <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-gray-900" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleLanguage}
+                className="flex items-center gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                <span className="text-sm">{language === 'ar' ? 'EN' : 'عربي'}</span>
+              </Button>
+
+              {user ? (
+                <div className="flex items-center gap-4">
+                  {user.role === 'admin' && (
+                    <Link to="/dashboard">
+                      <Button variant="outline">{t('nav.dashboard')}</Button>
+                    </Link>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={logout}
+                    className="flex items-center gap-2"
                   >
-                    {item.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
+                    <LogOut className="h-4 w-4" />
+                    {t('nav.logout')}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Link to="/login">
+                    <Button variant="ghost">{t('nav.login')}</Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button>{t('nav.register')}</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-background/95 backdrop-blur shadow-md">
-          <nav className="container mx-auto px-4 py-3">
-            <ul className="space-y-2">
-              {navItems.map((item, index) => (
-                <li key={index}>
-                  <a 
-                    href={item.href} 
-                    className="block py-2 font-arabic text-foreground hover:text-dates-brown transition-colors text-right"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      )}
-    </header>
+      </nav>
+
+      <Outlet />
+    </>
   );
 };
 

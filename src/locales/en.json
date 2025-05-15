@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero": {
+      "title": "Premium Natural Products",
+      "subtitle": "Discover our selection of high-quality dates, honey, and more"
+    },
+    "categories": {
+      "dates": {
+        "name": "Dates",
+        "description": "Premium quality dates from the finest farms"
+      },
+      "palms": {
+        "name": "Palm Trees",
+        "description": "Beautiful palm trees for your garden"
+      },
+      "honey": {
+        "name": "Honey",
+        "description": "Pure, natural honey from local beekeepers"
+      },
+      "olive": {
+        "name": "Olive Products",
+        "description": "Extra virgin olive oil and more"
+      },
+      "farm": {
+        "name": "Farm Products",
+        "description": "Fresh produce from our organic farm"
+      }
+    },
+    "features": {
+      "quality": {
+        "title": "Premium Quality",
+        "description": "We source only the finest products"
+      },
+      "shipping": {
+        "title": "Fast Shipping",
+        "description": "Free shipping on all orders"
+      },
+      "guarantee": {
+        "title": "Quality Guarantee",
+        "description": "100% satisfaction guaranteed"
+      }
+    }
+  },
+  "products": {
+    "title": "Our Products",
+    "search": "Search products...",
+    "categories": {
+      "all": "All Categories",
+      "dates": "Dates",
+      "palms": "Palm Trees",
+      "honey": "Honey",
+      "olive": "Olive Products",
+      "farm": "Farm Products"
+    },
+    "attributes": {
+      "price": "Price",
+      "stock": "Stock",
+      "addToCart": "Add to Cart",
+      "outOfStock": "Out of Stock"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": {
+      "title": "Your Cart is Empty",
+      "message": "Add some products to your cart to continue shopping",
+      "continue": "Continue Shopping"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "free": "Free",
+      "total": "Total",
+      "checkout": "Proceed to Checkout",
+      "clear": "Clear Cart"
+    }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "empty": {
+      "title": "Your Cart is Empty",
+      "message": "Add some products to your cart to continue shopping",
+      "continue": "Continue Shopping"
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "zipCode": "ZIP Code",
+      "country": "Country",
+      "submit": "Proceed to Payment"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "total": "Total"
+    },
+    "success": "Order placed successfully",
+    "error": "Failed to place order. Please try again."
+  },
+  "orderConfirmation": {
+    "title": "Order Confirmed",
+    "message": "Thank you for your order. We'll send you an email with the order details.",
+    "continueShopping": "Continue Shopping",
+    "viewOrders": "View Orders"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "loading": "Signing in...",
+      "success": "Logged in successfully",
+      "error": "Invalid email or password",
+      "noAccount": "Don't have an account?",
+      "register": "Create one"
+    },
+    "register": {
+      "title": "Create Account",
+      "name": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "loading": "Creating account...",
+      "success": "Account created successfully",
+      "error": "Failed to create account",
+      "haveAccount": "Already have an account?",
+      "login": "Sign in"
+    }
+  }
+} 
