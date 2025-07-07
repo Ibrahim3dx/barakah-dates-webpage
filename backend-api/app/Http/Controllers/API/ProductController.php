@@ -18,7 +18,7 @@ class ProductController extends Controller
         $query = Product::query();
 
         if ($request->has('search')) {
-            $search = $request->search;
+            $search = $request->get('search');
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
@@ -49,6 +49,12 @@ class ProductController extends Controller
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean'
         ]);
+
+        // Convert price to retail_price for database storage
+        if (isset($validated['price'])) {
+            $validated['retail_price'] = $validated['price'];
+            unset($validated['price']);
+        }
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
@@ -83,6 +89,12 @@ class ProductController extends Controller
             'image' => 'nullable|image|max:2048',
             'is_active' => 'boolean'
         ]);
+
+        // Convert price to retail_price for database storage
+        if (isset($validated['price'])) {
+            $validated['retail_price'] = $validated['price'];
+            unset($validated['price']);
+        }
 
         if ($request->hasFile('image')) {
             // Delete old image if exists

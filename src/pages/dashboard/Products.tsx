@@ -2,34 +2,34 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import ProductForm from '@/components/dashboard/ProductForm';
+import api from '@/lib/api';
+import { Product, ProductsResponse } from '@/types/dashboard';
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery<ProductsResponse>({
     queryKey: ['products', searchQuery],
     queryFn: async () => {
-      const response = await fetch(`/api/products?search=${searchQuery}`);
-      return response.json();
+      const response = await api.get(`/api/products?search=${searchQuery}`);
+      return response.data;
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-      });
-      return response.json();
+      const response = await api.delete(`/api/products/${id}`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
-  const handleEdit = (product: any) => {
+  const handleEdit = (product: Product) => {
     setSelectedProduct(product);
     setIsFormOpen(true);
   };
@@ -100,7 +100,7 @@ const Products = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products?.data?.map((product: any) => (
+              {products?.data?.map((product: Product) => (
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -173,4 +173,4 @@ const Products = () => {
   );
 };
 
-export default Products; 
+export default Products;

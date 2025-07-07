@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Edit } from 'lucide-react';
+import api from '@/lib/api';
+import OrderForm from '@/components/dashboard/OrderForm';
+import { Order, OrdersResponse } from '@/types/dashboard';
 
 const Orders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading } = useQuery<OrdersResponse>({
     queryKey: ['orders', searchQuery, statusFilter],
     queryFn: async () => {
-      const response = await fetch(
+      const response = await api.get(
         `/api/orders?search=${searchQuery}&status=${statusFilter}`
       );
-      return response.json();
+      return response.data;
     },
   });
 
@@ -90,7 +95,7 @@ const Orders = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {orders?.data?.map((order: any) => (
+              {orders?.data?.map((order: Order) => (
                 <tr key={order.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     #{order.id}
@@ -108,14 +113,14 @@ const Orders = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.status === 'completed'
+                        order.order_status === 'completed'
                           ? 'bg-green-100 text-green-800'
-                          : order.status === 'cancelled'
+                          : order.order_status === 'cancelled'
                           ? 'bg-red-100 text-red-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}
                     >
-                      {order.status}
+                      {order.order_status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -130,9 +135,20 @@ const Orders = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-indigo-600 hover:text-indigo-900">
-                      <Eye className="h-5 w-5" />
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditingOrder(order);
+                          setShowOrderForm(true);
+                        }}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <Edit className="h-5 w-5" />
+                      </button>
+                      <button className="text-indigo-600 hover:text-indigo-900">
+                        <Eye className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -140,8 +156,19 @@ const Orders = () => {
           </table>
         </div>
       </div>
+
+      {/* Order Form Modal */}
+      {showOrderForm && editingOrder && (
+        <OrderForm
+          order={editingOrder}
+          onClose={() => {
+            setShowOrderForm(false);
+            setEditingOrder(null);
+          }}
+        />
+      )}
     </div>
   );
 };
 
-export default Orders; 
+export default Orders;

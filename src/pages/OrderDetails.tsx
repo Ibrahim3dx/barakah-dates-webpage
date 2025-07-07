@@ -36,7 +36,7 @@ const OrderDetails = () => {
   const { data: order, isLoading, error } = useQuery<Order>({
     queryKey: ['order', id],
     queryFn: async () => {
-      const response = await fetch(`/api/orders/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },

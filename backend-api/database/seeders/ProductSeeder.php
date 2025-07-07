@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Medjool Dates',
                 'slug' => 'medjool-dates',
                 'description' => 'Premium Medjool dates, known for their large size and rich, caramel-like taste.',
-                'price' => 24.99,
+                'retail_price' => 24.99,
                 'stock' => 100,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -31,7 +31,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Ajwa Dates',
                 'slug' => 'ajwa-dates',
                 'description' => 'Premium Ajwa dates from Madinah, known for their soft texture and unique taste.',
-                'price' => 29.99,
+                'retail_price' => 29.99,
                 'stock' => 75,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -46,7 +46,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Dried Khudri Dates',
                 'slug' => 'dried-khudri-dates',
                 'description' => 'Traditional Khudri dates, dried to perfection while maintaining their natural sweetness.',
-                'price' => 19.99,
+                'retail_price' => 19.99,
                 'stock' => 150,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -61,7 +61,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Dried Sukkari Dates',
                 'slug' => 'dried-sukkari-dates',
                 'description' => 'Premium Sukkari dates, known for their golden color and sweet taste.',
-                'price' => 22.99,
+                'retail_price' => 22.99,
                 'stock' => 120,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -76,7 +76,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Date Syrup',
                 'slug' => 'date-syrup',
                 'description' => 'Natural date syrup made from premium dates, perfect for sweetening drinks and desserts.',
-                'price' => 14.99,
+                'retail_price' => 14.99,
                 'stock' => 80,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -91,7 +91,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Date Paste',
                 'slug' => 'date-paste',
                 'description' => 'Smooth date paste made from premium dates, perfect for baking and cooking.',
-                'price' => 12.99,
+                'retail_price' => 12.99,
                 'stock' => 90,
                 'image_url' => 'https://images.unsplash.com/photo-1603046891741-c2b738a1c3a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
                 'is_active' => true,
@@ -104,11 +104,14 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            DB::table('products')->insert([
-                ...$product,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('products')->updateOrInsert(
+                ['slug' => $product['slug']],
+                [
+                    ...$product,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 } 

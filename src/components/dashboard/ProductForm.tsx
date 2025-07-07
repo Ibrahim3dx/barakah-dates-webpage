@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
+import api from '@/lib/api';
 
 interface ProductFormProps {
   product?: any;
@@ -22,17 +23,49 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const url = product
-        ? `/api/products/${product.id}`
-        : '/api/products';
-      const method = product ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        body: data,
-      });
-      return response.json();
+    mutationFn: async (data: Record<string, string | number | boolean | null>) => {
+      if (product) {
+        // If updating and no new image, send as JSON
+        if (!image) {
+          const response = await api.put(`/api/products/${product.id}`, data, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          return response.data;
+        } else {
+          // If updating with new image, use FormData with POST + method override
+          const formData = new FormData();
+          Object.entries(data).forEach(([key, value]) => {
+            formData.append(key, value.toString());
+          });
+          formData.append('image', image);
+          formData.append('_method', 'PUT');
+
+          const response = await api.post(`/api/products/${product.id}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          return response.data;
+        }
+      } else {
+        // Creating new product
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+          formData.append(key, value.toString());
+        });
+        if (image) {
+          formData.append('image', image);
+        }
+
+        const response = await api.post('/api/products', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -42,17 +75,19 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formDataToSend = new FormData();
-    
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value.toString());
-    });
 
-    if (image) {
-      formDataToSend.append('image', image);
-    }
+    // Convert formData to the correct format
+    const dataToSend = {
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price) || 0,
+      wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price) : null,
+      wholesale_threshold: formData.wholesale_threshold ? parseInt(formData.wholesale_threshold) : null,
+      stock: parseInt(formData.stock) || 0,
+      is_active: formData.is_active
+    };
 
-    mutation.mutate(formDataToSend);
+    mutation.mutate(dataToSend);
   };
 
   const handleChange = (
@@ -250,9 +285,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             <button
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              disabled={mutation.isLoading}
             >
-              {mutation.isLoading ? 'Saving...' : 'Save'}
+              {mutation.isPending ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
@@ -261,4 +295,4 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   );
 };
 
-export default ProductForm; 
+export default ProductForm;

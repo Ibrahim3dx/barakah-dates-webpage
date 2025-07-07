@@ -32,6 +32,15 @@ class Order extends Model
         'order_status' => 'string'
     ];
 
+    // Append order_number to JSON output
+    protected $appends = ['order_number'];
+
+    // Accessor for order_number - returns the id as order number
+    public function getOrderNumberAttribute(): int
+    {
+        return $this->id;
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);

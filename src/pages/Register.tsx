@@ -13,10 +13,10 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
+  password_confirmation: z.string(),
+}).refine((data) => data.password === data.password_confirmation, {
   message: "Passwords don't match",
-  path: ["confirmPassword"],
+  path: ["password_confirmation"],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -38,7 +38,7 @@ const Register = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await registerUser(data.name, data.email, data.password);
+      await registerUser(data.name, data.email, data.password, data.password_confirmation);
       toast.success(t('auth.register.success'));
       navigate('/');
     } catch (error) {
@@ -101,11 +101,11 @@ const Register = () => {
             </label>
             <Input
               type="password"
-              {...register('confirmPassword')}
-              className={errors.confirmPassword ? 'border-red-500' : ''}
+              {...register('password_confirmation')}
+              className={errors.password_confirmation ? 'border-red-500' : ''}
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+            {errors.password_confirmation && (
+              <p className="text-red-500 text-sm mt-1">{errors.password_confirmation.message}</p>
             )}
           </div>
 

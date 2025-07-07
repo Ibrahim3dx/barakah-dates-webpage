@@ -22,9 +22,33 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Order::with(['items.product']);
+
+        // Apply search filter if provided
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('customer_email', 'like', "%{$search}%")
+                  ->orWhere('customer_phone', 'like', "%{$search}%")
+                  ->orWhere('id', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter if provided and valid
+        if ($request->has('status') && $request->status && $request->status !== 'all') {
+            $query->where('order_status', $request->status);
+        }
+
+        // Order by created_at in descending order (latest first)
+        $query->orderBy('created_at', 'desc');
+
+        // Paginate the results
+        $orders = $query->paginate(10);
+
+        return response()->json($orders);
     }
 
     /**
@@ -48,7 +72,7 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $order = Order::create([
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user() ? $request->user()->id : null,
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
                 'customer_phone' => $validated['customer_phone'],
@@ -66,14 +90,14 @@ class OrderController extends Controller
 
             foreach ($validated['items'] as $item) {
                 $product = Product::findOrFail($item['product_id']);
-                
+
                 if ($product->stock < $item['quantity']) {
                     throw new \Exception("Insufficient stock for product: {$product->name}");
                 }
 
                 $isItemWholesale = $product->isWholesale($item['quantity']);
                 $unitPrice = $product->getPriceForQuantity($item['quantity']);
-                
+
                 $order->items()->create([
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
@@ -95,10 +119,17 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Send WhatsApp notification
-            $this->whatsAppService->sendOrderNotification($order);
+            // Send WhatsApp notification or get WhatsApp URL
+            $whatsappResult = $this->whatsAppService->sendOrderNotification($order);
+            
+            $response = $order->load('items.product');
+            
+            // If WhatsApp service is disabled, include the WhatsApp URL in response
+            if (is_string($whatsappResult)) {
+                $response->whatsapp_url = $whatsappResult;
+            }
 
-            return response()->json($order->load('items.product'), 201);
+            return response()->json($response, 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -111,24 +142,52 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Order $order)
     {
-        //
+        $order->load(['items.product', 'user']);
+        return response()->json($order);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Order $order)
     {
-        //
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'required|email',
+            'customer_phone' => 'required|string',
+            'shipping_address' => 'required|string',
+            'order_status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
+            'payment_status' => ['required', Rule::in(['pending', 'paid', 'failed'])],
+            'notes' => 'nullable|string',
+        ]);
+
+        $order->update($validated);
+
+        return response()->json($order->load(['items.product', 'user']));
+    }
+
+    /**
+     * Update order status.
+     */
+    public function updateStatus(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'order_status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
+        ]);
+
+        $order->update($validated);
+
+        return response()->json($order);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Order $order)
     {
-        //
+        $order->delete();
+        return response()->json(['message' => 'Order deleted successfully']);
     }
 }

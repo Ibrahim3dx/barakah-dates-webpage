@@ -47,4 +47,11 @@ return [
         'mode' => env('PAYPAL_MODE', 'sandbox'),
     ],
 
+    'whatsapp' => [
+        'api_url' => env('WHATSAPP_API_URL', ''),
+        'api_key' => env('WHATSAPP_API_KEY', ''),
+        'enabled' => env('ENABLE_WHATSAPP_SERVICE', false),
+        'receiver_number' => env('ORDER_MESSAGE_RECIVER_NUMBER', ''),
+    ],
+
 ];

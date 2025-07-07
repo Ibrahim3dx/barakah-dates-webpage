@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { 
-  DollarSign, 
-  ShoppingCart, 
-  TrendingUp, 
-  Users 
+import {
+  DollarSign,
+  ShoppingCart,
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -16,6 +16,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import api from '@/lib/api';
 
 ChartJS.register(
   CategoryScale,
@@ -31,16 +32,16 @@ const Dashboard = () => {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/stats');
-      return response.json();
+      const response = await api.get('/api/dashboard/stats');
+      return response.data;
     },
   });
 
   const { data: revenue, isLoading: revenueLoading } = useQuery({
     queryKey: ['dashboard-revenue'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/revenue');
-      return response.json();
+      const response = await api.get('/api/dashboard/revenue');
+      return response.data;
     },
   });
 
@@ -202,4 +203,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

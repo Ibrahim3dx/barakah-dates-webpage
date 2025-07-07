@@ -14,13 +14,19 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->apiUrl = config('services.whatsapp.api_url');
-        $this->apiKey = config('services.whatsapp.api_key');
-        $this->phoneNumber = Setting::get('whatsapp_number');
+        $this->apiUrl = config('services.whatsapp.api_url') ?? '';
+        $this->apiKey = config('services.whatsapp.api_key') ?? '';
+        $this->phoneNumber = Setting::get('whatsapp_number') ?? '';
     }
 
-    public function sendOrderNotification(Order $order): bool
+    public function sendOrderNotification(Order $order): bool|string
     {
+        // Check if WhatsApp service is enabled
+        if (!config('services.whatsapp.enabled', false)) {
+            // Return WhatsApp URL for manual message sending
+            return $this->generateWhatsAppUrl($order);
+        }
+
         if (!$this->phoneNumber) {
             return false;
         }
@@ -62,5 +68,17 @@ class WhatsAppService
                "Total Amount: {$order->total_amount}\n" .
                "Payment Method: {$order->payment_method}\n" .
                "Order Status: {$order->order_status}";
+    }
+
+    private function generateWhatsAppUrl(Order $order): string
+    {
+        $receiverNumber = config('services.whatsapp.receiver_number');
+        $message = $this->formatOrderMessage($order);
+        
+        // Encode the message for URL
+        $encodedMessage = urlencode($message);
+        
+        // Generate WhatsApp URL
+        return "https://wa.me/{$receiverNumber}?text={$encodedMessage}";
     }
 }

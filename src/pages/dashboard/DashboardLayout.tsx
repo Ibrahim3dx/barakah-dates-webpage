@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -21,18 +21,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Products', href: '/dashboard/products', icon: Package },
-    { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
-    { name: 'Users', href: '/dashboard/users', icon: Users },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('nav.products'), href: '/dashboard/products', icon: Package },
+    { name: t('nav.orders'), href: '/dashboard/orders', icon: ShoppingCart },
+    { name: t('nav.users'), href: '/dashboard/users', icon: Users },
+    { name: t('nav.settings'), href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
@@ -60,14 +62,16 @@ const DashboardLayout = () => {
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
             return (
-              <Link
+              <NavLink
                 key={item.name}
                 to={item.href}
-                className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                  isActive
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                className={({ isActive }) =>
+                  `group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                    isActive
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`
+                }
               >
                 <item.icon
                   className={`mr-4 h-6 w-6 ${
@@ -75,7 +79,7 @@ const DashboardLayout = () => {
                   }`}
                 />
                 {item.name}
-              </Link>
+              </NavLink>
             );
           })}
         </nav>

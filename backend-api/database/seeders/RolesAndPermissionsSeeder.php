@@ -18,46 +18,44 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create roles
         $superAdmin = Role::create([
             'name' => 'Super Admin',
-            'slug' => 'super-admin',
-            'description' => 'Super Administrator with full access'
+            'guard_name' => 'super-admin'
         ]);
 
         $admin = Role::create([
             'name' => 'Admin',
-            'slug' => 'admin',
-            'description' => 'Administrator with limited access'
+            'guard_name' => 'admin'
         ]);
 
         // Create permissions
         $permissions = [
             // Dashboard permissions
-            ['name' => 'View Dashboard', 'slug' => 'view-dashboard'],
-            ['name' => 'View Reports', 'slug' => 'view-reports'],
-            
+            ['name' => 'View Dashboard', 'guard_name' => 'view-dashboard'],
+            ['name' => 'View Reports', 'guard_name' => 'view-reports'],
+
             // Product permissions
-            ['name' => 'View Products', 'slug' => 'view-products'],
-            ['name' => 'Create Products', 'slug' => 'create-products'],
-            ['name' => 'Edit Products', 'slug' => 'edit-products'],
-            ['name' => 'Delete Products', 'slug' => 'delete-products'],
-            
+            ['name' => 'View Products', 'guard_name' => 'view-products'],
+            ['name' => 'Create Products', 'guard_name' => 'create-products'],
+            ['name' => 'Edit Products', 'guard_name' => 'edit-products'],
+            ['name' => 'Delete Products', 'guard_name' => 'delete-products'],
+
             // Order permissions
-            ['name' => 'View Orders', 'slug' => 'view-orders'],
-            ['name' => 'Manage Orders', 'slug' => 'manage-orders'],
-            
+            ['name' => 'View Orders', 'guard_name' => 'view-orders'],
+            ['name' => 'Manage Orders', 'guard_name' => 'manage-orders'],
+
             // User permissions
-            ['name' => 'View Users', 'slug' => 'view-users'],
-            ['name' => 'Create Users', 'slug' => 'create-users'],
-            ['name' => 'Edit Users', 'slug' => 'edit-users'],
-            ['name' => 'Delete Users', 'slug' => 'delete-users'],
-            
+            ['name' => 'View Users', 'guard_name' => 'view-users'],
+            ['name' => 'Create Users', 'guard_name' => 'create-users'],
+            ['name' => 'Edit Users', 'guard_name' => 'edit-users'],
+            ['name' => 'Delete Users', 'guard_name' => 'delete-users'],
+
             // Integration permissions
-            ['name' => 'Manage Integrations', 'slug' => 'manage-integrations'],
-            
+            ['name' => 'Manage Integrations', 'guard_name' => 'manage-integrations'],
+
             // Settings permissions
-            ['name' => 'Manage Settings', 'slug' => 'manage-settings'],
-            
+            ['name' => 'Manage Settings', 'guard_name' => 'manage-settings'],
+
             // Action Log permissions
-            ['name' => 'View Action Logs', 'slug' => 'view-action-logs'],
+            ['name' => 'View Action Logs', 'guard_name' => 'view-action-logs'],
         ];
 
         foreach ($permissions as $permission) {
@@ -68,7 +66,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $superAdmin->permissions()->attach(Permission::all());
 
         // Assign limited permissions to admin
-        $adminPermissions = Permission::whereIn('slug', [
+        $adminPermissions = Permission::whereIn('guard_name', [
             'view-dashboard',
             'view-reports',
             'view-products',

@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
+            $table->string('name');
+            $table->string('guard_name')->default('web');
             $table->timestamps();
+
+            $table->unique(['name', 'guard_name']);
         });
 
         // Create pivot table for role_user

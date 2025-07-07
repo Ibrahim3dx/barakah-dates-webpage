@@ -6,22 +6,40 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  retail_price: string;
+  stock: number;
+}
+
+interface ApiResponse {
+  data: Product[];
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
 
-  const { data: products, isLoading } = useQuery({
+  const { data: response, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ['products', searchQuery],
     queryFn: async () => {
-      const response = await fetch(`/api/products?search=${searchQuery}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products?search=${searchQuery}`);
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }
-      return response.json();
+      const data = await response.json();
+      console.log('API Response:', data); // Debug log
+      return data;
     },
   });
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addToCart(product);
     toast.success(`${product.name} added to cart`);
   };
@@ -30,6 +48,28 @@ const Products = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Error loading products: {error.message}</div>
+      </div>
+    );
+  }
+
+  // Debug logs
+  console.log('Response:', response);
+  console.log('Response data:', response?.data);
+  console.log('Is array?', Array.isArray(response?.data));
+
+  // Safety check for data
+  if (!response?.data || !Array.isArray(response.data)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">No products available</div>
       </div>
     );
   }
@@ -51,7 +91,7 @@ const Products = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products?.data?.map((product: any) => (
+        {response.data.map((product) => (
           <div
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden"
@@ -67,7 +107,7 @@ const Products = () => {
                 {product.description}
               </p>
               <div className="flex justify-between items-center">
-                <span className="text-xl font-bold">${product.price}</span>
+                <span className="text-xl font-bold">${product.retail_price}</span>
                 <Button
                   onClick={() => handleAddToCart(product)}
                   className="flex items-center gap-2"

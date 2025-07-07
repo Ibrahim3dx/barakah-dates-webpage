@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -16,9 +17,11 @@ class DashboardController extends Controller
     {
         $period = $request->get('period', 'today');
         $startDate = $this->getStartDate($period);
-        
+
         $stats = [
             'total_orders' => Order::where('created_at', '>=', $startDate)->count(),
+            'total_products' => Product::count(),
+            'total_users' => User::count(),
             'total_revenue' => Order::where('created_at', '>=', $startDate)
                 ->where('payment_status', 'paid')
                 ->sum('total_amount'),
@@ -36,7 +39,7 @@ class DashboardController extends Controller
     {
         $period = $request->get('period', 'monthly');
         $startDate = $this->getStartDate($period);
-        
+
         $revenue = Order::where('created_at', '>=', $startDate)
             ->where('payment_status', 'paid')
             ->select(
@@ -50,11 +53,40 @@ class DashboardController extends Controller
         return response()->json($revenue);
     }
 
+    public function orders()
+    {
+        $orders = Order::with('user')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    public function products()
+    {
+        $products = Product::with('category')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        return response()->json($products);
+    }
+
+    public function users()
+    {
+        $users = User::latest()
+            ->limit(10)
+            ->get();
+
+        return response()->json($users);
+    }
+
     public function profit(Request $request)
     {
         $period = $request->get('period', 'monthly');
         $startDate = $this->getStartDate($period);
-        
+
         $profit = OrderItem::whereHas('order', function ($query) use ($startDate) {
                 $query->where('created_at', '>=', $startDate)
                     ->where('payment_status', 'paid');
@@ -85,7 +117,7 @@ class DashboardController extends Controller
                 DB::raw('SUM(quantity) as total_quantity'),
                 DB::raw('SUM(total_price) as total_revenue')
             )
-            ->with('product:id,name,price')
+            ->with('product:id,name,retail_price')
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit($limit)
@@ -133,7 +165,7 @@ class DashboardController extends Controller
                 DB::raw('SUM(quantity) as total_quantity'),
                 DB::raw('SUM(total_price) as total_revenue')
             )
-            ->with('product:id,name,price')
+            ->with('product:id,name,retail_price')
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit($limit)

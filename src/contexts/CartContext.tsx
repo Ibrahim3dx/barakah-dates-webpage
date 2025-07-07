@@ -1,21 +1,36 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  retail_price: number;
+  wholesale_price?: number;
+  wholesale_threshold?: number;
+  image_url: string;
+  stock: number;
+}
+
 interface CartItem {
   id: number;
   name: string;
   price: number;
+  retail_price: number;
+  wholesale_price?: number;
+  wholesale_threshold?: number;
   quantity: number;
   image_url: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: Product) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalAmount: number;
+  getItemPrice: (item: CartItem) => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,7 +42,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      setItems(JSON.parse(savedCart));
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        // Validate and clean cart data
+        const validatedCart = parsedCart.map((item: Partial<CartItem>) => ({
+          id: item.id || 0,
+          name: item.name || '',
+          image_url: item.image_url || '',
+          price: Number(item.price) || Number(item.retail_price) || 0,
+          retail_price: Number(item.retail_price) || Number(item.price) || 0,
+          wholesale_price: item.wholesale_price ? Number(item.wholesale_price) : undefined,
+          wholesale_threshold: item.wholesale_threshold,
+          quantity: Number(item.quantity) || 1
+        }));
+        setItems(validatedCart);
+      } catch (error) {
+        console.error('Error parsing cart from localStorage:', error);
+        localStorage.removeItem('cart');
+      }
     }
   }, []);
 
@@ -36,10 +68,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (product: any) => {
+  // Function to calculate the price based on quantity (wholesale vs retail)
+  const getItemPrice = (item: CartItem): number => {
+    if (item.wholesale_threshold && item.wholesale_price && item.quantity >= item.wholesale_threshold) {
+      return Number(item.wholesale_price) || 0;
+    }
+    return Number(item.retail_price) || Number(item.price) || 0;
+  };
+
+  const addToCart = (product: Product) => {
     setItems(currentItems => {
       const existingItem = currentItems.find(item => item.id === product.id);
-      
+
       if (existingItem) {
         return currentItems.map(item =>
           item.id === product.id
@@ -52,6 +92,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         id: product.id,
         name: product.name,
         price: product.price,
+        retail_price: product.retail_price,
+        wholesale_price: product.wholesale_price,
+        wholesale_threshold: product.wholesale_threshold,
         quantity: 1,
         image_url: product.image_url
       }];
@@ -79,7 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-  const totalAmount = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const totalAmount = items.reduce((total, item) => total + (getItemPrice(item) * item.quantity), 0);
 
   return (
     <CartContext.Provider value={{
@@ -89,17 +132,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       updateQuantity,
       clearCart,
       totalItems,
-      totalAmount
+      totalAmount,
+      getItemPrice
     }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export function useCart() {
+export const useCart = () => {
   const context = useContext(CartContext);
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-} 
+};

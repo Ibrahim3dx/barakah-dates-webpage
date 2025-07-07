@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { items, removeFromCart, updateQuantity, clearCart, totalAmount } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, totalAmount, getItemPrice } = useCart();
   const { t } = useLanguage();
 
   const handleCheckout = () => {
@@ -33,7 +33,7 @@ const Cart = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">{t('cart.title')}</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
@@ -48,7 +48,12 @@ const Cart = () => {
                   />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <p className="text-gray-600">${item.price}</p>
+                    <div className="text-gray-600">
+                      <p>${(Number(getItemPrice(item)) || 0).toFixed(2)} each</p>
+                      {item.wholesale_threshold && item.quantity >= item.wholesale_threshold && (
+                        <p className="text-green-600 text-sm">Wholesale price applied!</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -68,7 +73,7 @@ const Cart = () => {
                     </Button>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">${((Number(getItemPrice(item)) || 0) * item.quantity).toFixed(2)}</p>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -124,4 +129,4 @@ const Cart = () => {
   );
 };
 
-export default Cart; 
+export default Cart;

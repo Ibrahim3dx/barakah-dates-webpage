@@ -4,42 +4,71 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\IntegrationController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [LoginController::class, 'login']);
+Route::post('/auth/register', [RegisterController::class, 'register']);
+
+// Public product routes
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{product}', [ProductController::class, 'show']);
+
+// Public category routes
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+// Public order creation (for guests)
+Route::post('/orders', [OrderController::class, 'store']);
+
+// Payment callback routes (no auth required)
+Route::post('/payments/massarat/callback', [PaymentController::class, 'handleMassarATCallback'])
+    ->name('api.payments.massarat.callback');
+Route::post('/payments/paypal/callback', [PaymentController::class, 'handlePayPalCallback'])
+    ->name('api.payments.paypal.callback');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/logout', [LoginController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
     // Dashboard routes
     Route::middleware('permission:view-dashboard')->group(function () {
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
         Route::get('/dashboard/revenue', [DashboardController::class, 'revenue']);
-        Route::get('/dashboard/profit', [DashboardController::class, 'profit']);
-        Route::get('/dashboard/best-sellers', [DashboardController::class, 'bestSellers']);
+        Route::get('/dashboard/orders', [DashboardController::class, 'orders']);
+        Route::get('/dashboard/products', [DashboardController::class, 'products']);
+        Route::get('/dashboard/users', [DashboardController::class, 'users']);
     });
 
-    // Product routes
-    Route::middleware('permission:view-products')->group(function () {
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::get('/products/{product}', [ProductController::class, 'show']);
-    });
-
+    // Product management routes
     Route::middleware('permission:create-products')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
     });
 
     Route::middleware('permission:edit-products')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update']);
+        Route::post('/products/{product}', [ProductController::class, 'update']); // For multipart/form-data with _method override
         Route::patch('/products/{product}/stock', [ProductController::class, 'updateStock']);
     });
 
@@ -47,14 +76,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
     });
 
-    // Order routes
+    // Order management routes
     Route::middleware('permission:view-orders')->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
     });
 
     Route::middleware('permission:manage-orders')->group(function () {
-        Route::post('/orders', [OrderController::class, 'store']);
         Route::put('/orders/{order}', [OrderController::class, 'update']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });
@@ -101,9 +129,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}/payments/verify', [PaymentController::class, 'verifyPayment'])
         ->name('api.payments.verify');
 });
-
-// Payment callback routes (no auth required)
-Route::post('/payments/massarat/callback', [PaymentController::class, 'handleMassarATCallback'])
-    ->name('api.payments.massarat.callback');
-Route::post('/payments/paypal/callback', [PaymentController::class, 'handlePayPalCallback'])
-    ->name('api.payments.paypal.callback'); 

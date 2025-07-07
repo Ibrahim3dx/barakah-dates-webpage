@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import api from '@/lib/api';
 
 interface User {
   id: number;
@@ -11,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, password_confirmation: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -25,16 +26,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check if user is logged in
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('/api/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setUser(data);
+      api.get('/api/me')
+        .then((response) => {
+          setUser(response.data);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('Error fetching user data:', error);
           localStorage.removeItem('token');
         })
         .finally(() => {
@@ -46,40 +43,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      console.log('Attempting login for:', email);
+      const response = await api.post('/api/auth/login', { email, password });
+      console.log('Login response:', response.data);
 
-    if (!response.ok) {
-      throw new Error('Invalid credentials');
-    }
+      if (!response.data.token) {
+        throw new Error('No token received from server');
+      }
 
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-    setUser(data.user);
-  };
-
-  const register = async (name: string, email: string, password: string) => {
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Registration failed');
+      localStorage.setItem('token', response.data.token);
+      setUser(response.data.user);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  const register = async (name: string, email: string, password: string, password_confirmation: string) => {
+    try {
+      console.log('Attempting registration for:', email);
+      console.log('Password confirmation:', password === password_confirmation);
+
+      const response = await api.post('/api/auth/register', {
+        name,
+        email,
+        password,
+        password_confirmation
+      });
+
+      console.log('Registration response:', response.data);
+
+      if (response.data.errors) {
+        // Handle validation errors
+        const errorMessages = Object.values(response.data.errors).flat();
+        throw new Error(errorMessages.join(', '));
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.post('/api/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (
@@ -103,4 +117,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

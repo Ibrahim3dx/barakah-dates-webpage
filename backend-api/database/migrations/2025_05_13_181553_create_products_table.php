@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('wholesale_threshold')->nullable();
             $table->date('expiration_date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -6,14 +6,19 @@
     "login": "Login",
     "register": "Register",
     "dashboard": "Dashboard",
+    "orders": "Orders",
+    "users": "Users",
+    "settings": "Settings",
     "logout": "Logout"
   },
   "home": {
     "hero": {
       "title": "Premium Natural Products",
-      "subtitle": "Discover our selection of high-quality dates, honey, and more"
+      "subtitle": "Discover our selection of high-quality dates, honey, and more",
+      "cta": "Browse Products"
     },
     "categories": {
+      "title": "Product Categories",
       "dates": {
         "name": "Dates",
         "description": "Premium quality dates from the finest farms"
@@ -48,11 +53,28 @@
         "title": "Quality Guarantee",
         "description": "100% satisfaction guaranteed"
       }
-    }
+    },
+    "cta": {
+      "title": "Start Shopping Now",
+      "subtitle": "Discover our wide range of premium natural products",
+      "button": "Browse Products"
+    },
+    "title": "Welcome to Al Barakah Dates",
+    "subtitle": "Premium Quality Dates from Saudi Arabia"
   },
   "products": {
     "title": "Our Products",
+    "filter": "Filter",
+    "sort": "Sort",
     "search": "Search products...",
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of Stock",
+    "price": "Price",
+    "wholesale_price": "Wholesale Price",
+    "wholesale_threshold": "Wholesale Threshold",
+    "stock": "Stock",
+    "allCategories": "All Categories",
+    "noProducts": "No products found",
     "categories": {
       "all": "All Categories",
       "dates": "Dates",
@@ -62,31 +84,43 @@
       "farm": "Farm Products"
     },
     "attributes": {
-      "price": "Price",
       "stock": "Stock",
       "addToCart": "Add to Cart",
-      "outOfStock": "Out of Stock"
+      "outOfStock": "Out of Stock",
+      "weight": "Weight",
+      "volume": "Volume",
+      "origin": "Origin",
+      "shelfLife": "Shelf Life",
+      "harvestDate": "Harvest Date",
+      "ingredients": "Ingredients"
     }
   },
   "cart": {
     "title": "Shopping Cart",
-    "empty": {
-      "title": "Your Cart is Empty",
-      "message": "Add some products to your cart to continue shopping",
-      "continue": "Continue Shopping"
-    },
-    "summary": {
-      "title": "Order Summary",
-      "subtotal": "Subtotal",
-      "shipping": "Shipping",
-      "free": "Free",
-      "total": "Total",
-      "checkout": "Proceed to Checkout",
-      "clear": "Clear Cart"
-    }
+    "empty": "Your cart is empty",
+    "continue_shopping": "Continue Shopping",
+    "checkout": "Proceed to Checkout",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "shipping": "Shipping",
+    "tax": "Tax"
   },
   "checkout": {
     "title": "Checkout",
+    "shipping_info": "Shipping Information",
+    "payment_info": "Payment Information",
+    "order_summary": "Order Summary",
+    "place_order": "Place Order",
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "state": "State",
+    "zip": "ZIP Code",
+    "country": "Country",
     "empty": {
       "title": "Your Cart is Empty",
       "message": "Add some products to your cart to continue shopping",
@@ -102,7 +136,13 @@
       "state": "State",
       "zipCode": "ZIP Code",
       "country": "Country",
+      "paymentMethod": "Payment Method",
       "submit": "Proceed to Payment"
+    },
+    "payment": {
+      "cash": "Cash on Delivery",
+      "massarat": "Massarat Payment",
+      "paypal": "PayPal"
     },
     "summary": {
       "title": "Order Summary",
@@ -111,15 +151,45 @@
     "success": "Order placed successfully",
     "error": "Failed to place order. Please try again."
   },
-  "orderConfirmation": {
-    "title": "Order Confirmed",
-    "message": "Thank you for your order. We'll send you an email with the order details.",
-    "continueShopping": "Continue Shopping",
-    "viewOrders": "View Orders"
+  "order": {
+    "thank_you": "Thank you for your order!",
+    "order_number": "Order Number",
+    "order_date": "Order Date",
+    "status": "Order Status",
+    "shipping_address": "Shipping Address",
+    "payment_method": "Payment Method",
+    "items": "Items",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "confirmation": {
+      "title": "Order Confirmed",
+      "message": "Thank you for your order. We'll send you an email with the order details.",
+      "details": "Order Details",
+      "orderNumber": "Order Number",
+      "date": "Order Date",
+      "total": "Total Amount",
+      "continueShopping": "Continue Shopping",
+      "viewOrders": "View Orders"
+    }
   },
   "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "name": "Full Name",
+    "forgot_password": "Forgot Password?",
+    "remember_me": "Remember Me",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?",
+    "login_success": "Login successful",
+    "register_success": "Registration successful",
+    "logout_success": "Logout successful",
     "login": {
       "title": "Sign In",
+      "subtitle": "or",
+      "createAccount": "Create a new account",
       "email": "Email",
       "password": "Password",
       "submit": "Sign In",
@@ -131,6 +201,8 @@
     },
     "register": {
       "title": "Create Account",
+      "subtitle": "or",
+      "signIn": "Sign in to your account",
       "name": "Full Name",
       "email": "Email",
       "password": "Password",
@@ -142,5 +214,25 @@
       "haveAccount": "Already have an account?",
       "login": "Sign in"
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "recent_orders": "Recent Orders",
+    "total_sales": "Total Sales",
+    "total_orders": "Total Orders",
+    "total_customers": "Total Customers",
+    "view_all": "View All",
+    "settings": {
+      "title": "Settings",
+      "general": "General Settings",
+      "appearance": "Appearance",
+      "notifications": "Notifications",
+      "security": "Security",
+      "save": "Save Changes",
+      "cancel": "Cancel",
+      "success": "Settings updated successfully",
+      "error": "Failed to update settings"
+    }
   }
-} 
+}

@@ -13,7 +13,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
-        'price',
+        'retail_price',
         'wholesale_price',
         'wholesale_threshold',
         'stock',
@@ -22,12 +22,27 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
+        'retail_price' => 'decimal:2',
         'wholesale_price' => 'decimal:2',
         'wholesale_threshold' => 'integer',
         'stock' => 'integer',
         'is_active' => 'boolean'
     ];
+
+    // Add price to appends so it's included in JSON responses
+    protected $appends = ['price'];
+
+    // Accessor for price - returns retail_price
+    public function getPriceAttribute(): float
+    {
+        return $this->retail_price;
+    }
+
+    // Mutator for price - sets retail_price
+    public function setPriceAttribute($value): void
+    {
+        $this->attributes['retail_price'] = $value;
+    }
 
     public function orderItems(): HasMany
     {
@@ -39,7 +54,7 @@ class Product extends Model
         if ($this->wholesale_threshold && $quantity >= $this->wholesale_threshold) {
             return $this->wholesale_price;
         }
-        return $this->price;
+        return $this->retail_price;
     }
 
     public function isWholesale(int $quantity): bool

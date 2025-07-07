@@ -1,25 +1,27 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ShoppingCart } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { useCart } from '../contexts/CartContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useCart } from '@/contexts/CartContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 interface Product {
   id: number;
   name: string;
   description: string;
-  price: number;
   image_url: string;
+  retail_price: string;
+  wholesale_price?: string;
+  wholesale_threshold?: number;
   stock: number;
-  category: {
+  category?: {
     id: number;
     name: string;
     slug: string;
   };
-  attributes: {
+  attributes?: {
     weight?: string;
     volume?: string;
     origin?: string;
@@ -37,6 +39,13 @@ interface Category {
   image_url: string;
 }
 
+interface ApiResponse {
+  data: Product[];
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -46,7 +55,7 @@ const Products = () => {
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await fetch('/api/categories');
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
@@ -54,18 +63,19 @@ const Products = () => {
     },
   });
 
-  const { data: products, isLoading } = useQuery<Product[]>({
+  const { data: response, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ['products', searchQuery, selectedCategory],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (selectedCategory) params.append('category_id', selectedCategory.toString());
-      
-      const response = await fetch(`/api/products?${params.toString()}`);
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products?${params.toString()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }
-      return response.json();
+      const data = await response.json();
+      return data;
     },
   });
 
@@ -74,7 +84,20 @@ const Products = () => {
       toast.error(t('products.outOfStock'));
       return;
     }
-    addToCart(product);
+
+    // Convert to the format expected by cart
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: parseFloat(product.retail_price),
+      retail_price: parseFloat(product.retail_price),
+      wholesale_price: product.wholesale_price ? parseFloat(product.wholesale_price) : undefined,
+      wholesale_threshold: product.wholesale_threshold,
+      image_url: product.image_url,
+      stock: product.stock
+    };
+
+    addToCart(cartProduct);
     toast.success(`${product.name} ${t('products.addedToCart')}`);
   };
 
@@ -82,6 +105,28 @@ const Products = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Error loading products: {error.message}</div>
+      </div>
+    );
+  }
+
+  // Debug logs
+  console.log('Response:', response);
+  console.log('Response data:', response?.data);
+  console.log('Is array?', Array.isArray(response?.data));
+
+  // Safety check for data
+  if (!response?.data || !Array.isArray(response.data)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">{t('products.noProducts')}</div>
       </div>
     );
   }
@@ -106,7 +151,7 @@ const Products = () => {
             onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
             className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="">{t('products.categories')}</option>
+            <option value="">{t('products.allCategories')}</option>
             {categories?.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -117,7 +162,7 @@ const Products = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products?.map((product) => (
+        {response.data.map((product) => (
           <div
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden"
@@ -130,31 +175,40 @@ const Products = () => {
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <h2 className="text-xl font-semibold">{product.name}</h2>
-                <span className="text-sm text-gray-500">{product.category.name}</span>
+                {product.category && (
+                  <span className="text-sm text-gray-500">{product.category.name}</span>
+                )}
               </div>
               <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                 {product.description}
               </p>
-              <div className="space-y-2 mb-4">
-                {product.attributes.weight && (
-                  <p className="text-sm text-gray-500">
-                    {t('products.attributes.weight')}: {product.attributes.weight}
-                  </p>
-                )}
-                {product.attributes.volume && (
-                  <p className="text-sm text-gray-500">
-                    {t('products.attributes.volume')}: {product.attributes.volume}
-                  </p>
-                )}
-                {product.attributes.origin && (
-                  <p className="text-sm text-gray-500">
-                    {t('products.attributes.origin')}: {product.attributes.origin}
-                  </p>
-                )}
-              </div>
+              {product.attributes && (
+                <div className="space-y-2 mb-4">
+                  {product.attributes.weight && (
+                    <p className="text-sm text-gray-500">
+                      {t('products.attributes.weight')}: {product.attributes.weight}
+                    </p>
+                  )}
+                  {product.attributes.volume && (
+                    <p className="text-sm text-gray-500">
+                      {t('products.attributes.volume')}: {product.attributes.volume}
+                    </p>
+                  )}
+                  {product.attributes.origin && (
+                    <p className="text-sm text-gray-500">
+                      {t('products.attributes.origin')}: {product.attributes.origin}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <div>
-                  <span className="text-xl font-bold">${product.price}</span>
+                  <span className="text-xl font-bold">${product.retail_price}</span>
+                  {product.wholesale_price && product.wholesale_threshold && (
+                    <p className="text-sm text-green-600">
+                      ${product.wholesale_price} when buying {product.wholesale_threshold}+
+                    </p>
+                  )}
                   {product.stock <= 0 && (
                     <span className="ml-2 text-sm text-red-500">{t('products.outOfStock')}</span>
                   )}

@@ -7,6 +7,8 @@ import { Input } from '../components/ui/input';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'sonner';
+import { useState } from 'react';
+import api from '../lib/api';
 
 const checkoutSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -18,6 +20,7 @@ const checkoutSchema = z.object({
   state: z.string().min(1, 'State is required'),
   zipCode: z.string().min(1, 'ZIP code is required'),
   country: z.string().min(1, 'Country is required'),
+  paymentMethod: z.enum(['cash', 'massarat', 'paypal']).default('cash'),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -26,6 +29,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalAmount, clearCart } = useCart();
   const { t } = useLanguage();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -36,16 +40,54 @@ const Checkout = () => {
   });
 
   const onSubmit = async (data: CheckoutFormData) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
-      // Here you would typically send the order to your backend
-      console.log('Order data:', { ...data, items, totalAmount });
-      
-      // Clear the cart and redirect to order confirmation
-      clearCart();
-      navigate('/order-confirmation');
-      toast.success(t('checkout.success'));
+      // Prepare order data for API
+      const orderData = {
+        customer_name: `${data.firstName} ${data.lastName}`,
+        customer_email: data.email,
+        customer_phone: data.phone,
+        shipping_address: `${data.address}, ${data.city}, ${data.state} ${data.zipCode}, ${data.country}`,
+        payment_method: data.paymentMethod,
+        notes: '',
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
+      };
+
+      console.log('Creating order:', orderData);
+
+      // Create the order via API
+      const response = await api.post('/api/orders', orderData);
+
+      if (response.data) {
+        console.log('Order created successfully:', response.data);
+
+        // Check if there's a WhatsApp URL for manual messaging
+        if (response.data.whatsapp_url) {
+          // Open WhatsApp URL in a new tab
+          window.open(response.data.whatsapp_url, '_blank');
+        }
+
+        // Clear the cart and redirect to order confirmation
+        clearCart();
+        navigate('/order-confirmation', {
+          state: {
+            orderId: response.data.id,
+            orderNumber: response.data.order_number || response.data.id,
+            whatsappUrl: response.data.whatsapp_url
+          }
+        });
+        toast.success(t('checkout.success'));
+      }
     } catch (error) {
+      console.error('Order creation failed:', error);
       toast.error(t('checkout.error'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,7 +106,7 @@ const Checkout = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">{t('checkout.title')}</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Checkout Form */}
         <div className="lg:col-span-2">
@@ -82,7 +124,7 @@ const Checkout = () => {
                   <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">
                   {t('checkout.form.lastName')}
@@ -151,7 +193,7 @@ const Checkout = () => {
                   <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">
                   {t('checkout.form.state')}
@@ -179,7 +221,7 @@ const Checkout = () => {
                   <p className="text-red-500 text-sm mt-1">{errors.zipCode.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">
                   {t('checkout.form.country')}
@@ -194,8 +236,25 @@ const Checkout = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              {t('checkout.form.submit')}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('checkout.form.paymentMethod')}
+              </label>
+              <select
+                {...register('paymentMethod')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="cash">{t('checkout.payment.cash')}</option>
+                <option value="massarat">{t('checkout.payment.massarat')}</option>
+                <option value="paypal">{t('checkout.payment.paypal')}</option>
+              </select>
+              {errors.paymentMethod && (
+                <p className="text-red-500 text-sm mt-1">{errors.paymentMethod.message}</p>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : t('checkout.form.submit')}
             </Button>
           </form>
         </div>
@@ -225,4 +284,4 @@ const Checkout = () => {
   );
 };
 
-export default Checkout; 
+export default Checkout;
