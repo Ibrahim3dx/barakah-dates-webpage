@@ -171,6 +171,20 @@
     "error": "فشل في تقديم الطلب. يرجى المحاولة مرة أخرى."
   },
   "order": {
+    "myOrders": {
+      "title": "طلباتي",
+      "noOrders": "لا توجد طلبات بعد",
+      "noOrdersMessage": "لم تقم بأي طلبات بعد.",
+      "startShopping": "ابدأ التسوق",
+      "itemsOrdered": "المنتجات المطلوبة",
+      "deliveryInfo": "معلومات التوصيل",
+      "quantity": "الكمية",
+      "total": "المجموع",
+      "shippingAddress": "عنوان الشحن",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "wholesale": "جملة"
+    },
     "confirmation": {
       "title": "تم تأكيد الطلب",
       "message": "شكراً لطلبك. سنرسل لك بريداً إلكترونياً بتفاصيل الطلب.",

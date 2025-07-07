@@ -167,6 +167,20 @@
     "shipping": "Shipping",
     "tax": "Tax",
     "total": "Total",
+    "myOrders": {
+      "title": "My Orders",
+      "noOrders": "No Orders Yet",
+      "noOrdersMessage": "You haven't placed any orders yet.",
+      "startShopping": "Start Shopping",
+      "itemsOrdered": "Items Ordered",
+      "deliveryInfo": "Delivery Information",
+      "quantity": "Quantity",
+      "total": "Total",
+      "shippingAddress": "Shipping Address",
+      "phone": "Phone",
+      "email": "Email",
+      "wholesale": "Wholesale"
+    },
     "confirmation": {
       "title": "Order Confirmed",
       "message": "Thank you for your order. We'll send you an email with the order details.",

@@ -83,7 +83,7 @@ const OrderConfirmation = () => {
               {t('order.confirmation.continueShopping')}
             </Button>
             <Button
-              onClick={() => navigate('/dashboard/orders')}
+              onClick={() => navigate('/my-orders')}
             >
               {t('order.confirmation.viewOrders')}
             </Button>

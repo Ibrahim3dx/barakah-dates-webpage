@@ -19,6 +19,7 @@ import DashboardOrders from './pages/dashboard/Orders';
 import DashboardUsers from './pages/dashboard/Users';
 import DashboardSettings from './pages/dashboard/Settings';
 import OrderConfirmation from './pages/OrderConfirmation';
+import MyOrders from './pages/MyOrders';
 import Index from './pages/Index';
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ function App() {
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="order-confirmation" element={<OrderConfirmation />} />
+                  <Route path="my-orders" element={<MyOrders />} />
                 </Route>
 
                 {/* Protected Dashboard Routes */}

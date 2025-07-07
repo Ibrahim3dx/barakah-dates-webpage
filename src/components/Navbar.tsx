@@ -49,6 +49,9 @@ const Navbar = () => {
 
               {user ? (
                 <div className="flex items-center gap-4">
+                  <Link to="/my-orders" className="text-gray-600 hover:text-gray-900">
+                    {t('nav.orders')}
+                  </Link>
                   {user.role === 'admin' && (
                     <Link to="/dashboard">
                       <Button variant="outline">{t('nav.dashboard')}</Button>

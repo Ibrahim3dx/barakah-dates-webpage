@@ -26,6 +26,11 @@ class OrderController extends Controller
     {
         $query = Order::with(['items.product']);
 
+        // If user_id is provided, filter orders for that specific user
+        if ($request->has('user_id') && $request->user_id) {
+            $query->where('user_id', $request->user_id);
+        }
+
         // Apply search filter if provided
         if ($request->has('search') && $request->search) {
             $search = $request->search;
