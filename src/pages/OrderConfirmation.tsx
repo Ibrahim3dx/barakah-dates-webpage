@@ -55,7 +55,7 @@ const OrderConfirmation = () => {
                 <span className="font-medium">{new Date().toLocaleDateString()}</span>
               </div>
             </div>
-            
+
             {whatsappUrl && (
               <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center mb-2">
@@ -94,4 +94,4 @@ const OrderConfirmation = () => {
   );
 };
 
-export default OrderConfirmation; 
+export default OrderConfirmation;

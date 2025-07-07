@@ -74,10 +74,10 @@ class WhatsAppService
     {
         $receiverNumber = config('services.whatsapp.receiver_number');
         $message = $this->formatOrderMessage($order);
-        
+
         // Encode the message for URL
         $encodedMessage = urlencode($message);
-        
+
         // Generate WhatsApp URL
         return "https://wa.me/{$receiverNumber}?text={$encodedMessage}";
     }

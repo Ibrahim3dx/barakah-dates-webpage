@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -57,5 +58,21 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('Super Admin');
+    }
+
+    /**
+     * Get the user's orders.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the user's latest order with shipping information.
+     */
+    public function latestOrder()
+    {
+        return $this->orders()->latest()->first();
     }
 }

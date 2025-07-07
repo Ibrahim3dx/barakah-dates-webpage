@@ -126,6 +126,10 @@
       "message": "Add some products to your cart to continue shopping",
       "continue": "Continue Shopping"
     },
+    "autofill": {
+      "title": "Auto-filled from your profile",
+      "message": "Your information has been pre-filled based on your previous orders. You can modify any field if needed."
+    },
     "form": {
       "firstName": "First Name",
       "lastName": "Last Name",

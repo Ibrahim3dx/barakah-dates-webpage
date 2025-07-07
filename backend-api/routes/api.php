@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/auth/logout', [LoginController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/profile', [AuthController::class, 'profile']);
 
     // Dashboard routes
     Route::middleware('permission:view-dashboard')->group(function () {

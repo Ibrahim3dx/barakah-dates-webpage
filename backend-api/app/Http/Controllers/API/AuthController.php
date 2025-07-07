@@ -30,7 +30,7 @@ class AuthController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
-            
+
             if (!$user) {
                 Log::error('User not found after successful authentication', ['email' => $request->email]);
                 throw ValidationException::withMessages([
@@ -146,6 +146,69 @@ class AuthController extends Controller
             ]);
             return response()->json([
                 'message' => 'An error occurred while fetching user data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function profile(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $latestOrder = $user->latestOrder();
+
+            $autofillData = [
+                'email' => $user->email,
+                'firstName' => '',
+                'lastName' => '',
+                'phone' => '',
+                'address' => '',
+                'city' => '',
+                'state' => '',
+                'zipCode' => '',
+                'country' => ''
+            ];
+
+            if ($latestOrder) {
+                // Parse the customer name into first and last name
+                $nameParts = explode(' ', $latestOrder->customer_name, 2);
+                $autofillData['firstName'] = $nameParts[0] ?? '';
+                $autofillData['lastName'] = $nameParts[1] ?? '';
+                $autofillData['phone'] = $latestOrder->customer_phone ?? '';
+
+                // Parse the shipping address
+                if ($latestOrder->shipping_address) {
+                    $addressParts = explode(', ', $latestOrder->shipping_address);
+                    $autofillData['address'] = $addressParts[0] ?? '';
+                    $autofillData['city'] = $addressParts[1] ?? '';
+
+                    if (count($addressParts) >= 3) {
+                        $stateZip = $addressParts[2] ?? '';
+                        $stateZipParts = explode(' ', $stateZip);
+                        $autofillData['state'] = $stateZipParts[0] ?? '';
+                        $autofillData['zipCode'] = $stateZipParts[1] ?? '';
+                    }
+
+                    $autofillData['country'] = $addressParts[3] ?? '';
+                }
+            } else {
+                // If no previous orders, try to extract name from user's name field
+                $nameParts = explode(' ', $user->name, 2);
+                $autofillData['firstName'] = $nameParts[0] ?? '';
+                $autofillData['lastName'] = $nameParts[1] ?? '';
+            }
+
+            return response()->json([
+                'user' => $user,
+                'autofill' => $autofillData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching user profile', [
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'message' => 'An error occurred while fetching user profile.',
                 'error' => $e->getMessage()
             ], 500);
         }

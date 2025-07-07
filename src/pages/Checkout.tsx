@@ -6,8 +6,9 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 const checkoutSchema = z.object({
@@ -29,15 +30,38 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalAmount, clearCart } = useCart();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [autofillData, setAutofillData] = useState<Partial<CheckoutFormData> | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
   });
+
+  // Fetch user profile data for auto-fill
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const response = await api.get('/api/profile');
+          if (response.data?.autofill) {
+            setAutofillData(response.data.autofill);
+            // Reset form with auto-fill data
+            reset(response.data.autofill);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user, reset]);
 
   const onSubmit = async (data: CheckoutFormData) => {
     if (isSubmitting) return;
@@ -46,6 +70,7 @@ const Checkout = () => {
     try {
       // Prepare order data for API
       const orderData = {
+        ...(user && { user_id: user.id }), // Include user_id if logged in
         customer_name: `${data.firstName} ${data.lastName}`,
         customer_email: data.email,
         customer_phone: data.phone,
@@ -110,6 +135,14 @@ const Checkout = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Checkout Form */}
         <div className="lg:col-span-2">
+          {user && autofillData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800 text-sm">
+                <span className="font-medium">{t('checkout.autofill.title')}:</span> {t('checkout.autofill.message')}
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

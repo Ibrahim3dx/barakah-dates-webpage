@@ -57,6 +57,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'user_id' => 'nullable|exists:users,id',
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
             'customer_phone' => 'required|string',
@@ -72,7 +73,7 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $order = Order::create([
-                'user_id' => $request->user() ? $request->user()->id : null,
+                'user_id' => $validated['user_id'] ?? ($request->user() ? $request->user()->id : null),
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
                 'customer_phone' => $validated['customer_phone'],
@@ -121,9 +122,9 @@ class OrderController extends Controller
 
             // Send WhatsApp notification or get WhatsApp URL
             $whatsappResult = $this->whatsAppService->sendOrderNotification($order);
-            
+
             $response = $order->load('items.product');
-            
+
             // If WhatsApp service is disabled, include the WhatsApp URL in response
             if (is_string($whatsappResult)) {
                 $response->whatsapp_url = $whatsappResult;
