@@ -60,16 +60,16 @@ const OrderConfirmation = () => {
               <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center mb-2">
                   <MessageCircle className="h-5 w-5 text-green-600 mr-2" />
-                  <span className="text-green-800 font-medium">Send Order Details via WhatsApp</span>
+                  <span className="text-green-800 font-medium">{t('order.confirmation.whatsapp.title')}</span>
                 </div>
                 <p className="text-green-700 text-sm mb-3">
-                  Click the button below to send your order details via WhatsApp to complete the process.
+                  {t('order.confirmation.whatsapp.message')}
                 </p>
                 <Button
                   onClick={handleWhatsAppClick}
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
-                  Open WhatsApp
+                  {t('order.confirmation.whatsapp.button')}
                 </Button>
               </div>
             )}

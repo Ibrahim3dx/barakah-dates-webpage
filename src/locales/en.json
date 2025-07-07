@@ -175,7 +175,12 @@
       "date": "Order Date",
       "total": "Total Amount",
       "continueShopping": "Continue Shopping",
-      "viewOrders": "View Orders"
+      "viewOrders": "View Orders",
+      "whatsapp": {
+        "title": "Send Order Details via WhatsApp",
+        "message": "Click the button below to send your order details via WhatsApp to complete the process.",
+        "button": "Open WhatsApp"
+      }
     }
   },
   "auth": {
