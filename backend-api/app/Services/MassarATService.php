@@ -14,9 +14,9 @@ class MassarATService
 
     public function __construct()
     {
-        $this->apiUrl = config('services.massarat.api_url');
-        $this->apiKey = config('services.massarat.api_key');
-        $this->merchantId = config('services.massarat.merchant_id');
+        $this->apiUrl = config('services.massarat.api_url') ?? '';
+        $this->apiKey = config('services.massarat.api_key') ?? '';
+        $this->merchantId = config('services.massarat.merchant_id') ?? '';
     }
 
     public function createPayment(Order $order): array
@@ -106,4 +106,4 @@ class MassarATService
             ];
         }
     }
-} 
+}

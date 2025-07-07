@@ -36,7 +36,7 @@ class Order extends Model
     protected $appends = ['order_number'];
 
     // Accessor for order_number - returns the id as order number
-    public function getOrderNumberAttribute(): int
+    public function getOrderNumberAttribute(): ?int
     {
         return $this->id;
     }

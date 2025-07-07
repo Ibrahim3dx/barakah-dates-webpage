@@ -47,8 +47,16 @@ class ProductController extends Controller
             'wholesale_threshold' => 'nullable|integer|min:1',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'sometimes|in:true,false,1,0,on'
         ]);
+
+        // Convert is_active to boolean
+        if (isset($validated['is_active'])) {
+            $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            // If is_active is not provided, set to true by default for new products
+            $validated['is_active'] = true;
+        }
 
         // Convert price to retail_price for database storage
         if (isset($validated['price'])) {
@@ -87,8 +95,13 @@ class ProductController extends Controller
             'wholesale_threshold' => 'nullable|integer|min:1',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'sometimes|in:true,false,1,0,on'
         ]);
+
+        // Convert is_active to boolean
+        if (isset($validated['is_active'])) {
+            $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
+        }
 
         // Convert price to retail_price for database storage
         if (isset($validated['price'])) {
