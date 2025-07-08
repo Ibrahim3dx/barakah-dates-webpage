@@ -30,3 +30,14 @@ Route::get('storage/{path}', function ($path) {
 
     return response()->file($file);
 })->where('path', '.*');
+
+// Serve logo file
+Route::get('logo.png', function () {
+    $file = public_path('logo.png');
+
+    if (!file_exists($file)) {
+        abort(404);
+    }
+
+    return response()->file($file);
+});

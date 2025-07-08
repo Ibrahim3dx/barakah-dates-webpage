@@ -19,8 +19,12 @@ const Navbar = () => {
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-xl font-bold">
-              Barakah Dates
+            <Link to="/" className="flex items-center">
+              <img 
+                src={`${import.meta.env.VITE_BACKEND_URL}/logo.png`} 
+                alt="Barakah Dates" 
+                className="h-10 w-auto"
+              />
             </Link>
 
             <div className="flex items-center gap-4">
