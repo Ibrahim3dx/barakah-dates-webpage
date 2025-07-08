@@ -29,8 +29,8 @@ class Product extends Model
         'is_active' => 'boolean'
     ];
 
-    // Add price to appends so it's included in JSON responses
-    protected $appends = ['price'];
+    // Add price and image_url to appends so they're included in JSON responses
+    protected $appends = ['price', 'image_url'];
 
     // Accessor for price - returns retail_price
     public function getPriceAttribute(): float
@@ -42,6 +42,22 @@ class Product extends Model
     public function setPriceAttribute($value): void
     {
         $this->attributes['retail_price'] = $value;
+    }
+
+    // Accessor for image_url - returns full URL to the image
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If it's already a full URL (like seeded data), return as is
+        if (str_starts_with($this->image, 'http')) {
+            return $this->image;
+        }
+
+        // If it's a relative path, prepend the storage URL
+        return url('storage/' . $this->image);
     }
 
     public function orderItems(): HasMany
