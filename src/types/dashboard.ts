@@ -16,13 +16,22 @@ export interface Product {
   id: number;
   name: string;
   description: string;
+  category_id: number;
   retail_price: number;
   price: number; // accessor for frontend compatibility
+  wholesale_price?: number;
+  wholesale_threshold?: number;
   stock: number; // matches the database field name
-  image?: string;
+  image_url?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+    is_active: boolean;
+  };
 }
 
 export interface OrdersResponse {

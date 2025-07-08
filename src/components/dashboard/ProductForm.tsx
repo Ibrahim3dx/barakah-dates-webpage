@@ -1,10 +1,30 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  is_active: boolean;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  category_id: number;
+  price: number;
+  wholesale_price?: number;
+  wholesale_threshold?: number;
+  stock: number;
+  is_active: boolean;
+  category?: Category;
+}
+
 interface ProductFormProps {
-  product?: any;
+  product?: Product;
   onClose: () => void;
 }
 
@@ -12,15 +32,25 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
-    price: product?.price || '',
-    wholesale_price: product?.wholesale_price || '',
-    wholesale_threshold: product?.wholesale_threshold || '',
-    stock: product?.stock || '',
+    category_id: product?.category_id?.toString() || '',
+    price: product?.price?.toString() || '',
+    wholesale_price: product?.wholesale_price?.toString() || '',
+    wholesale_threshold: product?.wholesale_threshold?.toString() || '',
+    stock: product?.stock?.toString() || '',
     is_active: product?.is_active ?? true,
   });
 
   const [image, setImage] = useState<File | null>(null);
   const queryClient = useQueryClient();
+
+  // Fetch categories for the dropdown
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await api.get('/api/categories');
+      return response.data.data; // Assuming paginated response
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, string | number | boolean | null>) => {
@@ -80,10 +110,11 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     const dataToSend = {
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price) || 0,
-      wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price) : null,
-      wholesale_threshold: formData.wholesale_threshold ? parseInt(formData.wholesale_threshold) : null,
-      stock: parseInt(formData.stock) || 0,
+      category_id: parseInt(formData.category_id) || null,
+      price: parseFloat(formData.price.toString()) || 0,
+      wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price.toString()) : null,
+      wholesale_threshold: formData.wholesale_threshold ? parseInt(formData.wholesale_threshold.toString()) : null,
+      stock: parseInt(formData.stock.toString()) || 0,
       is_active: formData.is_active
     };
 
@@ -91,7 +122,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -150,6 +181,30 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="category_id"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Category
+            </label>
+            <select
+              name="category_id"
+              id="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories?.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -1,42 +1,67 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import ProductForm from '@/components/dashboard/ProductForm';
+import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import CategoryForm from '@/components/dashboard/CategoryForm';
 import api from '@/lib/api';
-import { Product, ProductsResponse } from '@/types/dashboard';
 
-const Products = () => {
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  slug: string;
+  is_active: boolean;
+  products_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CategoriesResponse {
+  data: Category[];
+  current_page: number;
+  last_page: number;
+  total: number;
+}
+
+const Categories = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: products, isLoading } = useQuery<ProductsResponse>({
-    queryKey: ['products', searchQuery],
+  const { data: categories, isLoading } = useQuery<CategoriesResponse>({
+    queryKey: ['categories', searchQuery],
     queryFn: async () => {
-      const response = await api.get(`/api/products?search=${searchQuery}`);
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+
+      const response = await api.get(`/api/categories?${params.toString()}`);
       return response.data;
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await api.delete(`/api/products/${id}`);
-      return response.data;
+    mutationFn: async (categoryId: number) => {
+      await api.delete(`/api/categories/${categoryId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
   });
 
-  const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category);
     setIsFormOpen(true);
   };
 
   const handleAdd = () => {
-    setSelectedProduct(null);
+    setSelectedCategory(null);
     setIsFormOpen(true);
+  };
+
+  const handleDelete = (categoryId: number) => {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      deleteMutation.mutate(categoryId);
+    }
   };
 
   if (isLoading) {
@@ -50,13 +75,13 @@ const Products = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Products</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Categories</h1>
         <button
           onClick={handleAdd}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <Plus className="h-5 w-5 mr-2" />
-          Add Product
+          Add Category
         </button>
       </div>
 
@@ -69,33 +94,30 @@ const Products = () => {
           <input
             type="text"
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Search products..."
+            placeholder="Search categories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Products Table */}
+      {/* Categories Table */}
       <div className="bg-white shadow rounded-lg">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
+                  Products Count
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -103,59 +125,52 @@ const Products = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products?.data?.map((product: Product) => (
-                <tr key={product.id}>
+              {categories?.data?.map((category: Category) => (
+                <tr key={category.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={product.image_url}
-                          alt={product.name}
-                        />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {category.name}
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {product.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {product.description}
-                        </div>
+                      <div className="text-sm text-gray-500">
+                        {category.description || 'No description'}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Slug: {category.slug}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.category ? product.category.name : 'No Category'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${product.price}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.stock}
+                    {category.products_count || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.is_active
+                        category.is_active
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {product.is_active ? 'Active' : 'Inactive'}
+                      {category.is_active ? 'Active' : 'Inactive'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(category.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => handleEdit(product)}
+                      onClick={() => handleEdit(category)}
                       className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       <Edit className="h-5 w-5" />
                     </button>
                     <button
                       className="text-red-600 hover:text-red-900"
-                      onClick={() => deleteMutation.mutate(product.id)}
+                      onClick={() => handleDelete(category.id)}
+                      disabled={category.products_count > 0}
+                      title={category.products_count > 0 ? 'Cannot delete category with products' : 'Delete category'}
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className={`h-5 w-5 ${category.products_count > 0 ? 'opacity-50 cursor-not-allowed' : ''}`} />
                     </button>
                   </td>
                 </tr>
@@ -163,15 +178,29 @@ const Products = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Empty State */}
+        {categories?.data?.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-500">No categories found.</div>
+            <button
+              onClick={handleAdd}
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add First Category
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Product Form Modal */}
+      {/* Category Form Modal */}
       {isFormOpen && (
-        <ProductForm
-          product={selectedProduct}
+        <CategoryForm
+          category={selectedCategory}
           onClose={() => {
             setIsFormOpen(false);
-            setSelectedProduct(null);
+            setSelectedCategory(null);
           }}
         />
       )}
@@ -179,4 +208,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default Categories;

@@ -2,6 +2,7 @@
   "nav": {
     "home": "Home",
     "products": "Products",
+    "categories": "Categories",
     "cart": "Cart",
     "login": "Login",
     "register": "Register",
@@ -257,5 +258,12 @@
       "success": "Settings updated successfully",
       "error": "Failed to update settings"
     }
+  },
+  "categories": {
+    "title": "Product Categories",
+    "searchPlaceholder": "Search categories...",
+    "noCategories": "No categories found",
+    "viewProducts": "View Products",
+    "productsCount": "products"
   }
 }

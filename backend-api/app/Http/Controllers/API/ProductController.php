@@ -15,7 +15,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Product::with('category');
 
         if ($request->has('search')) {
             $search = $request->get('search');
@@ -27,6 +27,10 @@ class ProductController extends Controller
 
         if ($request->has('active')) {
             $query->where('is_active', $request->boolean('active'));
+        }
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->get('category_id'));
         }
 
         $products = $query->latest()->paginate(10);
@@ -42,6 +46,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'wholesale_price' => 'nullable|numeric|min:0',
             'wholesale_threshold' => 'nullable|integer|min:1',
@@ -79,7 +84,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return response()->json($product);
+        return response()->json($product->load('category'));
     }
 
     /**
@@ -90,6 +95,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'wholesale_price' => 'nullable|numeric|min:0',
             'wholesale_threshold' => 'nullable|integer|min:1',

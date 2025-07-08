@@ -110,6 +110,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile management
     Route::put('/profile', [UserController::class, 'updateProfile']);
 
+    // Category management routes
+    Route::middleware('permission:create-products')->group(function () {
+        Route::post('/categories', [CategoryController::class, 'store']);
+    });
+
+    Route::middleware('permission:edit-products')->group(function () {
+        Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    });
+
+    Route::middleware('permission:delete-products')->group(function () {
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+    });
+
     // Settings routes
     Route::middleware('permission:manage-settings')->group(function () {
         Route::get('/settings', [SettingController::class, 'index']);

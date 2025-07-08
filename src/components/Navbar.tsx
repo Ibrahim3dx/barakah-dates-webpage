@@ -20,9 +20,9 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center">
-              <img 
-                src={`${import.meta.env.VITE_BACKEND_URL}/logo.png`} 
-                alt="Barakah Dates" 
+              <img
+                src={`${import.meta.env.VITE_BACKEND_URL}/logo.png`}
+                alt="Barakah Dates"
                 className="h-10 w-auto"
               />
             </Link>
@@ -30,6 +30,10 @@ const Navbar = () => {
             <div className="flex items-center gap-4">
               <Link to="/products" className="text-gray-600 hover:text-gray-900">
                 {t('nav.products')}
+              </Link>
+
+              <Link to="/categories" className="text-gray-600 hover:text-gray-900">
+                {t('nav.categories')}
               </Link>
 
               <Link to="/cart" className="relative">

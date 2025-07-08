@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
   Settings,
   Menu,
   X,
   LogOut,
-  User
+  User,
+  Folder
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ const DashboardLayout = () => {
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('nav.products'), href: '/dashboard/products', icon: Package },
+    { name: t('nav.categories'), href: '/dashboard/categories', icon: Folder },
     { name: t('nav.orders'), href: '/dashboard/orders', icon: ShoppingCart },
     { name: t('nav.users'), href: '/dashboard/users', icon: Users },
     { name: t('nav.settings'), href: '/dashboard/settings', icon: Settings },
@@ -128,4 +130,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout; 
+export default DashboardLayout;

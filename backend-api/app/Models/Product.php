@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -13,6 +14,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
+        'category_id',
         'retail_price',
         'wholesale_price',
         'wholesale_threshold',
@@ -22,6 +24,7 @@ class Product extends Model
     ];
 
     protected $casts = [
+        'category_id' => 'integer',
         'retail_price' => 'decimal:2',
         'wholesale_price' => 'decimal:2',
         'wholesale_threshold' => 'integer',
@@ -63,6 +66,11 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function getPriceForQuantity(int $quantity): float

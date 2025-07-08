@@ -59,7 +59,9 @@ const Products = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
-      return response.json();
+      const data = await response.json();
+      // Return the data array from the paginated response
+      return data.data || [];
     },
   });
 
@@ -132,99 +134,132 @@ const Products = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold mb-4 md:mb-0">{t('products.title')}</h1>
-        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder={t('products.search')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('products.title')}</h1>
+            <p className="text-gray-600">{t('home.hero.subtitle')}</p>
           </div>
-          <select
-            value={selectedCategory || ''}
-            onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
-            className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">{t('products.allCategories')}</option>
-            {categories?.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+
+          {/* Filter Section */}
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={t('products.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 border-orange-200 focus:border-orange-500 focus:ring-orange-500"
+              />
+            </div>
+            <select
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
+              className="border border-orange-200 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+            >
+              <option value="">{t('products.allCategories')}</option>
+              {categories?.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Products Grid */}
+      <div className="container mx-auto px-4 py-8">
+        {/* No Products Message */}
+        {response.data.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">{t('products.noProducts')}</p>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {response.data.map((product) => (
           <div
             key={product.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg border border-orange-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow"
           >
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full h-48 object-cover"
-            />
+            <div className="relative">
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+              {product.category && (
+                <span className="absolute top-2 right-2 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                  {product.category.name}
+                </span>
+              )}
+              {product.stock <= 0 && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <span className="text-white font-medium">{t('products.outOfStock')}</span>
+                </div>
+              )}
+            </div>
+
             <div className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h2 className="text-xl font-semibold">{product.name}</h2>
-                {product.category && (
-                  <span className="text-sm text-gray-500">{product.category.name}</span>
-                )}
-              </div>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+                {product.name}
+              </h3>
+
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                 {product.description}
               </p>
+
               {product.attributes && (
-                <div className="space-y-2 mb-4">
+                <div className="space-y-1 mb-3">
                   {product.attributes.weight && (
-                    <p className="text-sm text-gray-500">
-                      {t('products.attributes.weight')}: {product.attributes.weight}
-                    </p>
-                  )}
-                  {product.attributes.volume && (
-                    <p className="text-sm text-gray-500">
-                      {t('products.attributes.volume')}: {product.attributes.volume}
+                    <p className="text-xs text-gray-500">
+                      <span className="font-medium">{t('products.attributes.weight')}:</span> {product.attributes.weight}
                     </p>
                   )}
                   {product.attributes.origin && (
-                    <p className="text-sm text-gray-500">
-                      {t('products.attributes.origin')}: {product.attributes.origin}
+                    <p className="text-xs text-gray-500">
+                      <span className="font-medium">{t('products.attributes.origin')}:</span> {product.attributes.origin}
                     </p>
                   )}
                 </div>
               )}
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xl font-bold">${product.retail_price}</span>
-                  {product.wholesale_price && product.wholesale_threshold && (
-                    <p className="text-sm text-green-600">
-                      ${product.wholesale_price} when buying {product.wholesale_threshold}+
-                    </p>
-                  )}
-                  {product.stock <= 0 && (
-                    <span className="ml-2 text-sm text-red-500">{t('products.outOfStock')}</span>
-                  )}
+
+              <div className="border-t border-gray-100 pt-3">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <span className="text-lg font-bold text-orange-600">${product.retail_price}</span>
+                    {product.wholesale_price && product.wholesale_threshold && (
+                      <p className="text-xs text-green-600">
+                        ${product.wholesale_price} عند شراء {product.wholesale_threshold}+
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {t('products.stock')}: {product.stock}
+                  </span>
                 </div>
-                <Button
+
+                <button
                   onClick={() => handleAddToCart(product)}
-                  className="flex items-center gap-2"
                   disabled={product.stock <= 0}
+                  className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    product.stock <= 0
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-orange-500 text-white hover:bg-orange-600'
+                  }`}
                 >
-                  <ShoppingCart className="h-4 w-4" />
-                  {t('products.addToCart')}
-                </Button>
+                  {product.stock <= 0 ? t('products.outOfStock') : t('products.addToCart')}
+                </button>
               </div>
             </div>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );

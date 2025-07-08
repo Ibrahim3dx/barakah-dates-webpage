@@ -2,6 +2,7 @@
   "nav": {
     "home": "الرئيسية",
     "products": "المنتجات",
+    "categories": "الفئات",
     "cart": "السلة",
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
@@ -271,5 +272,12 @@
       "success": "تم تحديث الإعدادات بنجاح",
       "error": "فشل تحديث الإعدادات"
     }
+  },
+  "categories": {
+    "title": "تصنيفات المنتجات",
+    "searchPlaceholder": "البحث في الفئات...",
+    "noCategories": "لم يتم العثور على فئات",
+    "viewProducts": "عرض المنتجات",
+    "productsCount": "منتج"
   }
 }
