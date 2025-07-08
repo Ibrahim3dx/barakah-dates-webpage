@@ -26,7 +26,7 @@ use App\Http\Controllers\Auth\RegisterController;
 */
 
 // Public routes
-Route::post('/auth/login', [LoginController::class, 'login']);
+Route::post('/auth/login', [LoginController::class, 'login'])->name('login');
 Route::post('/auth/register', [RegisterController::class, 'register']);
 
 // Public product routes

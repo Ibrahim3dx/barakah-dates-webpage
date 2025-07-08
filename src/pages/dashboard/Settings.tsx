@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import api from '@/lib/api';
 
 interface Setting {
   id: number;
@@ -17,31 +18,15 @@ const Settings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/settings`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch settings');
-      }
-      return response.json();
+      const response = await api.get('/api/settings');
+      return response.data;
     },
   });
 
   const updateSetting = useMutation({
     mutationFn: async (setting: Setting) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/settings`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(setting),
-        }
-      );
-      if (!response.ok) {
-        throw new Error('Failed to update setting');
-      }
-      return response.json();
+      const response = await api.put('/api/settings', setting);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
