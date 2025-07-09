@@ -5,6 +5,11 @@ import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'sonner';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: number) => {
+  return `${amount.toFixed(2)} د.ل`;
+};
+
 const Cart = () => {
   const navigate = useNavigate();
   const { items, removeFromCart, updateQuantity, clearCart, totalAmount, getItemPrice } = useCart();
@@ -49,7 +54,7 @@ const Cart = () => {
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">{item.name}</h3>
                     <div className="text-gray-600">
-                      <p>${(Number(getItemPrice(item)) || 0).toFixed(2)} each</p>
+                      <p>{formatCurrency(Number(getItemPrice(item)) || 0)} each</p>
                       {item.wholesale_threshold && item.quantity >= item.wholesale_threshold && (
                         <p className="text-green-600 text-sm">Wholesale price applied!</p>
                       )}
@@ -73,7 +78,7 @@ const Cart = () => {
                     </Button>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${((Number(getItemPrice(item)) || 0) * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">{formatCurrency((Number(getItemPrice(item)) || 0) * item.quantity)}</p>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -96,7 +101,7 @@ const Cart = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span>{t('cart.summary.subtotal')}</span>
-                <span>${totalAmount.toFixed(2)}</span>
+                <span>{formatCurrency(totalAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>{t('cart.summary.shipping')}</span>
@@ -105,7 +110,7 @@ const Cart = () => {
               <div className="border-t pt-4">
                 <div className="flex justify-between font-semibold">
                   <span>{t('cart.summary.total')}</span>
-                  <span>${totalAmount.toFixed(2)}</span>
+                  <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
               <Button

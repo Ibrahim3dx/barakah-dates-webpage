@@ -5,7 +5,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1482881497185-d4a9ddbe4151')] bg-cover bg-center">
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
-      
+
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 md:py-32">
         <div className="max-w-5xl mx-auto text-center">
@@ -17,13 +17,13 @@ const Hero = () => {
             <Button size="lg" className="font-arabic text-lg bg-dates-amber hover:bg-dates-gold text-white">
               تصفح منتجاتنا
             </Button>
-            <Button size="lg" variant="outline" className="font-arabic text-lg border-white text-white hover:bg-white/10">
+            <Button size="lg" variant="outline" className="font-arabic text-lg bg-white/10 border-white text-white">
               تواصل معنا
             </Button>
           </div>
         </div>
       </div>
-      
+
       {/* Scroll Down Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
         <span className="text-white text-sm mb-2">استكشف المزيد</span>

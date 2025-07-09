@@ -7,6 +7,12 @@ import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: string | number) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return `${numAmount.toFixed(2)} د.ل`;
+};
+
 interface Product {
   id: number;
   name: string;
@@ -232,10 +238,10 @@ const Products = () => {
               <div className="border-t border-gray-100 pt-3">
                 <div className="flex justify-between items-center mb-3">
                   <div>
-                    <span className="text-lg font-bold text-orange-600">${product.retail_price}</span>
+                    <span className="text-lg font-bold text-orange-600">{formatCurrency(product.retail_price)}</span>
                     {product.wholesale_price && product.wholesale_threshold && (
                       <p className="text-xs text-green-600">
-                        ${product.wholesale_price} عند شراء {product.wholesale_threshold}+
+                        {formatCurrency(product.wholesale_price)} عند شراء {product.wholesale_threshold}+
                       </p>
                     )}
                   </div>

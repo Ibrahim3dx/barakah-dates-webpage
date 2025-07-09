@@ -5,6 +5,12 @@ import api from '@/lib/api';
 import OrderForm from '@/components/dashboard/OrderForm';
 import { Order, OrdersResponse } from '@/types/dashboard';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: string | number) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return `${numAmount.toFixed(2)} د.ل`;
+};
+
 const Orders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -108,7 +114,7 @@ const Orders = () => {
                     {new Date(order.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${order.total_amount}
+                    {formatCurrency(order.total_amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span

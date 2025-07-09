@@ -5,6 +5,12 @@ import ProductForm from '@/components/dashboard/ProductForm';
 import api from '@/lib/api';
 import { Product, ProductsResponse } from '@/types/dashboard';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: string | number) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return `${numAmount.toFixed(2)} د.ل`;
+};
+
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -128,7 +134,7 @@ const Products = () => {
                     {product.category ? product.category.name : 'No Category'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${product.price}
+                    {formatCurrency(product.price)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {product.stock}

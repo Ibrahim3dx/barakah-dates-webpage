@@ -8,6 +8,12 @@ import { CalendarDays, Package, CreditCard, MapPin, Phone, Mail } from 'lucide-r
 import api from '../lib/api';
 import { Link } from 'react-router-dom';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: string | number) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return `${numAmount.toFixed(2)} د.ل`;
+};
+
 interface OrderItem {
   id: number;
   quantity: number;
@@ -160,7 +166,7 @@ const MyOrders = () => {
                     <Badge className={getStatusColor(order.order_status)}>
                       {order.order_status}
                     </Badge>
-                    <span className="text-lg font-bold">${order.total_amount}</span>
+                    <span className="text-lg font-bold">{formatCurrency(order.total_amount)}</span>
                   </div>
                 </div>
               </CardHeader>
@@ -183,9 +189,9 @@ const MyOrders = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">${item.unit_price}</p>
+                            <p className="font-medium">{formatCurrency(item.unit_price)}</p>
                             <p className="text-sm text-gray-600">
-                              {t('order.myOrders.total')}: ${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}
+                              {t('order.myOrders.total')}: {formatCurrency(parseFloat(item.unit_price) * item.quantity)}
                             </p>
                           </div>
                         </div>

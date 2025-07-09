@@ -11,6 +11,11 @@ import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: number) => {
+  return `${amount.toFixed(2)} د.ل`;
+};
+
 const checkoutSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
@@ -300,13 +305,13 @@ const Checkout = () => {
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between">
                   <span>{item.name} x {item.quantity}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span>{formatCurrency(item.price * item.quantity)}</span>
                 </div>
               ))}
               <div className="border-t pt-4">
                 <div className="flex justify-between font-semibold">
                   <span>{t('checkout.summary.total')}</span>
-                  <span>${totalAmount.toFixed(2)}</span>
+                  <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
             </div>

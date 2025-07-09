@@ -4,6 +4,12 @@ import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: string | number) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return `${numAmount.toFixed(2)} د.ل`;
+};
+
 interface OrderItem {
   id: number;
   product_id: number;
@@ -157,8 +163,8 @@ const OrderDetails = () => {
                     <p className="text-gray-600">Quantity: {item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
-                    <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+                    <p className="font-medium">{formatCurrency((item.price * item.quantity))}</p>
+                    <p className="text-sm text-gray-600">{formatCurrency(item.price)} each</p>
                   </div>
                 </div>
               ))}
@@ -168,7 +174,7 @@ const OrderDetails = () => {
           <div className="border-t mt-6 pt-6">
             <div className="flex justify-between items-center">
               <span className="text-lg font-semibold">Total</span>
-              <span className="text-2xl font-bold">${order.total_amount.toFixed(2)}</span>
+              <span className="text-2xl font-bold">{formatCurrency(order.total_amount)}</span>
             </div>
           </div>
         </div>
@@ -186,4 +192,4 @@ const OrderDetails = () => {
   );
 };
 
-export default OrderDetails; 
+export default OrderDetails;

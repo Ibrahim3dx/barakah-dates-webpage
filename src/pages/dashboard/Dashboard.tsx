@@ -17,6 +17,7 @@ import {
   Legend,
 } from 'chart.js';
 import api from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 ChartJS.register(
   CategoryScale,
@@ -28,8 +29,38 @@ ChartJS.register(
   Legend
 );
 
+interface RevenueData {
+  date: string;
+  amount: number;
+}
+
+interface OrderData {
+  id: number;
+  customer_name: string;
+  total_amount: number;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+}
+
+interface DashboardStats {
+  total_revenue: number;
+  total_orders: number;
+  average_order_value: number;
+  total_customers: number;
+  recent_orders: OrderData[];
+}
+
+interface RevenueResponse {
+  data: RevenueData[];
+}
+
+// Currency formatter for Libyan Dinar
+const formatCurrency = (amount: number) => {
+  return `${amount.toFixed(2)} د.ل`;
+};
+
 const Dashboard = () => {
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { t } = useLanguage();
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const response = await api.get('/api/dashboard/stats');
@@ -37,7 +68,7 @@ const Dashboard = () => {
     },
   });
 
-  const { data: revenue, isLoading: revenueLoading } = useQuery({
+  const { data: revenue, isLoading: revenueLoading } = useQuery<RevenueResponse>({
     queryKey: ['dashboard-revenue'],
     queryFn: async () => {
       const response = await api.get('/api/dashboard/revenue');
@@ -47,37 +78,41 @@ const Dashboard = () => {
 
   const statsCards = [
     {
-      title: 'Total Revenue',
+      title: t('dashboard.total_revenue'),
       value: stats?.total_revenue || 0,
       icon: DollarSign,
       color: 'bg-green-500',
+      isCurrency: true,
     },
     {
-      title: 'Total Orders',
+      title: t('dashboard.total_orders'),
       value: stats?.total_orders || 0,
       icon: ShoppingCart,
       color: 'bg-blue-500',
+      isCurrency: false,
     },
     {
-      title: 'Average Order Value',
+      title: t('dashboard.average_order_value'),
       value: stats?.average_order_value || 0,
       icon: TrendingUp,
       color: 'bg-purple-500',
+      isCurrency: true,
     },
     {
-      title: 'Total Customers',
+      title: t('dashboard.total_customers'),
       value: stats?.total_customers || 0,
       icon: Users,
       color: 'bg-yellow-500',
+      isCurrency: false,
     },
   ];
 
   const revenueData = {
-    labels: revenue?.data?.map((item: any) => item.date) || [],
+    labels: revenue?.data?.map((item: RevenueData) => item.date) || [],
     datasets: [
       {
-        label: 'Revenue',
-        data: revenue?.data?.map((item: any) => item.amount) || [],
+        label: t('dashboard.revenue'),
+        data: revenue?.data?.map((item: RevenueData) => item.amount) || [],
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
       },
@@ -94,7 +129,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.title')}</h1>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -114,7 +149,9 @@ const Dashboard = () => {
                       {card.title}
                     </dt>
                     <dd className="text-lg font-semibold text-gray-900">
-                      ${card.value.toFixed(2)}
+                      {card.isCurrency
+                        ? formatCurrency(card.value)
+                        : card.value.toLocaleString()}
                     </dd>
                   </dl>
                 </div>
@@ -126,7 +163,7 @@ const Dashboard = () => {
 
       {/* Revenue Chart */}
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Revenue Overview</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">{t('dashboard.revenue_overview')}</h2>
         <div className="h-80">
           <Line
             data={revenueData}
@@ -137,7 +174,23 @@ const Dashboard = () => {
                 legend: {
                   position: 'top' as const,
                 },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return `${t('dashboard.revenue')}: ${formatCurrency(context.parsed.y)}`;
+                    }
+                  }
+                }
               },
+              scales: {
+                y: {
+                  ticks: {
+                    callback: function(value) {
+                      return formatCurrency(Number(value));
+                    }
+                  }
+                }
+              }
             }}
           />
         </div>
@@ -147,7 +200,7 @@ const Dashboard = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:px-6">
           <h3 className="text-lg font-medium leading-6 text-gray-900">
-            Recent Orders
+            {t('dashboard.recent_orders')}
           </h3>
         </div>
         <div className="border-t border-gray-200">
@@ -156,21 +209,21 @@ const Dashboard = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
+                    {t('dashboard.order_id')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
+                    {t('dashboard.customer')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                    {t('dashboard.amount')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('dashboard.status')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {stats?.recent_orders?.map((order: any) => (
+                {stats?.recent_orders?.map((order: OrderData) => (
                   <tr key={order.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{order.id}
@@ -179,17 +232,21 @@ const Dashboard = () => {
                       {order.customer_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${order.total_amount}
+                      {formatCurrency(order.total_amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           order.status === 'completed'
                             ? 'bg-green-100 text-green-800'
+                            : order.status === 'processing'
+                            ? 'bg-blue-100 text-blue-800'
+                            : order.status === 'cancelled'
+                            ? 'bg-red-100 text-red-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}
                       >
-                        {order.status}
+                        {t(`dashboard.order_status.${order.status}`) || order.status}
                       </span>
                     </td>
                   </tr>
