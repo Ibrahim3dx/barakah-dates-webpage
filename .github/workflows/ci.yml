@@ -1,43 +1,43 @@
-# name: 🚀 Deploy on push main
+name: 🚀 Deploy on push main
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   web-deploy:
-#     name: 🎉 Deploy
-#     runs-on: ubuntu-latest
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
 
-#     strategy:
-#       matrix:
-#         node-version: [18.x]
+    strategy:
+      matrix:
+        node-version: [18.x]
 
-#     steps:
-#     - name: 🚚 Get latest code
-#       uses: actions/checkout@v2
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2
 
-#     - name: Use Node.js ${{ matrix.node-version }}
-#       uses: actions/setup-node@main
-#       with:
-#         node-version: ${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@main
+      with:
+        node-version: ${{ matrix.node-version }}
 
-#     # - name: Copy .env.prod.example to .env
-#     #   run: cp .env.prod.example .env
+    # - name: Copy .env.prod.example to .env
+    #   run: cp .env.prod.example .env
 
-#     - name: 🔨 Build Project
-#       run: |
-#         npm install
-#         npm run build
+    - name: 🔨 Build Project
+      run: |
+        npm install
+        npm run build
 
-#     - name: List output files
-#       run: find dist/ -print
+    - name: List output files
+      run: find dist/ -print
 
-#     - name: 📂 Sync files
-#       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-#       with:
-#         server: ${{ secrets.BARKA_SERVER }}
-#         username: ${{ secrets.BARKA_FTP_USERNAME }}
-#         password: ${{ secrets.BARKA_FTP_PASSWORD }}
-#         local-dir: dist/
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.BARKA_SERVER }}
+        username: ${{ secrets.BARKA_FTP_USERNAME }}
+        password: ${{ secrets.BARKA_FTP_PASSWORD }}
+        local-dir: dist/
