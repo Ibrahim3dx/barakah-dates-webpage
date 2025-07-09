@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
 import { Order } from '@/types/dashboard';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OrderFormProps {
   order?: Order;
@@ -10,6 +11,8 @@ interface OrderFormProps {
 }
 
 const OrderForm = ({ order, onClose }: OrderFormProps) => {
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [formData, setFormData] = useState({
     customer_name: order?.customer_name || '',
     customer_email: order?.customer_email || '',
@@ -50,10 +53,10 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
+      <div className={`bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex justify-between items-center mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h2 className="text-xl font-semibold">
-            Edit Order #{order?.id}
+            {t('forms.edit_order')} #{order?.id}
           </h2>
           <button
             onClick={onClose}
@@ -70,7 +73,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 htmlFor="customer_name"
                 className="block text-sm font-medium text-gray-700"
               >
-                Customer Name
+                {t('dashboard.orders.customer_name')} *
               </label>
               <input
                 type="text"
@@ -78,7 +81,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 id="customer_name"
                 value={formData.customer_name}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
                 required
               />
             </div>
@@ -88,7 +91,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 htmlFor="customer_email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Customer Email
+                {t('dashboard.orders.customer_email')} *
               </label>
               <input
                 type="email"
@@ -96,7 +99,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 id="customer_email"
                 value={formData.customer_email}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
                 required
               />
             </div>
@@ -107,7 +110,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               htmlFor="customer_phone"
               className="block text-sm font-medium text-gray-700"
             >
-              Customer Phone
+              {t('forms.customer_phone')} *
             </label>
             <input
               type="tel"
@@ -115,7 +118,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               id="customer_phone"
               value={formData.customer_phone}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               required
             />
           </div>
@@ -125,7 +128,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               htmlFor="shipping_address"
               className="block text-sm font-medium text-gray-700"
             >
-              Shipping Address
+              {t('forms.shipping_address')} *
             </label>
             <textarea
               name="shipping_address"
@@ -133,7 +136,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               value={formData.shipping_address}
               onChange={handleChange}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               required
             />
           </div>
@@ -144,19 +147,19 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 htmlFor="order_status"
                 className="block text-sm font-medium text-gray-700"
               >
-                Order Status
+                {t('dashboard.orders.status')}
               </label>
               <select
                 name="order_status"
                 id="order_status"
                 value={formData.order_status}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               >
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="pending">{t('dashboard.order_status.pending')}</option>
+                <option value="processing">{t('dashboard.order_status.processing')}</option>
+                <option value="completed">{t('dashboard.order_status.completed')}</option>
+                <option value="cancelled">{t('dashboard.order_status.cancelled')}</option>
               </select>
             </div>
 
@@ -165,18 +168,18 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
                 htmlFor="payment_status"
                 className="block text-sm font-medium text-gray-700"
               >
-                Payment Status
+                {t('dashboard.orders.payment_status')}
               </label>
               <select
                 name="payment_status"
                 id="payment_status"
                 value={formData.payment_status}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               >
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="failed">Failed</option>
+                <option value="pending">{t('dashboard.order_status.pending')}</option>
+                <option value="paid">{t('dashboard.orders.paid')}</option>
+                <option value="failed">{t('forms.payment_failed')}</option>
               </select>
             </div>
           </div>
@@ -186,7 +189,7 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               htmlFor="notes"
               className="block text-sm font-medium text-gray-700"
             >
-              Notes
+              {t('forms.notes')}
             </label>
             <textarea
               name="notes"
@@ -194,24 +197,24 @@ const OrderForm = ({ order, onClose }: OrderFormProps) => {
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
             />
           </div>
 
-          <div className="flex justify-end space-x-3">
+          <div className={`flex justify-end space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {mutation.isPending ? 'Saving...' : 'Save Order'}
+              {mutation.isPending ? t('forms.saving') : t('forms.save_order')}
             </button>
           </div>
         </form>

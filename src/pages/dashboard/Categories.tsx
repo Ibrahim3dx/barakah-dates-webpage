@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 import CategoryForm from '@/components/dashboard/CategoryForm';
 import api from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Category {
   id: number;
@@ -27,6 +28,8 @@ const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
 
   const { data: categories, isLoading } = useQuery<CategoriesResponse>({
     queryKey: ['categories', searchQuery],
@@ -59,7 +62,7 @@ const Categories = () => {
   };
 
   const handleDelete = (categoryId: number) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm(t('dashboard.categories.delete_confirm'))) {
       deleteMutation.mutate(categoryId);
     }
   };
@@ -68,6 +71,7 @@ const Categories = () => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <p className="mt-4 text-gray-600">{t('dashboard.categories.loading')}</p>
       </div>
     );
   }
@@ -75,26 +79,26 @@ const Categories = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Categories</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.categories.title')}</h1>
         <button
           onClick={handleAdd}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Category
+          <Plus className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {t('dashboard.categories.add_category')}
         </button>
       </div>
 
       {/* Search Bar */}
       <div className="max-w-lg w-full">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
             <Search className="h-5 w-5 text-gray-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Search categories..."
+            className={`block w-full ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+            placeholder={t('dashboard.categories.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -107,20 +111,17 @@ const Categories = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.name')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Products Count
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.products_count')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th className={`px-6 py-3 ${isRTL ? 'text-left' : 'text-right'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.actions')}
                 </th>
               </tr>
             </thead>
@@ -133,10 +134,10 @@ const Categories = () => {
                         {category.name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {category.description || 'No description'}
+                        {category.description || t('dashboard.categories.no_description')}
                       </div>
                       <div className="text-xs text-gray-400">
-                        Slug: {category.slug}
+                        {t('dashboard.categories.slug')}: {category.slug}
                       </div>
                     </div>
                   </td>
@@ -151,11 +152,8 @@ const Categories = () => {
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {category.is_active ? 'Active' : 'Inactive'}
+                      {category.is_active ? t('dashboard.categories.active') : t('dashboard.categories.inactive')}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(category.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -168,7 +166,7 @@ const Categories = () => {
                       className="text-red-600 hover:text-red-900"
                       onClick={() => handleDelete(category.id)}
                       disabled={category.products_count > 0}
-                      title={category.products_count > 0 ? 'Cannot delete category with products' : 'Delete category'}
+                      title={category.products_count > 0 ? t('dashboard.categories.cannot_delete') : t('dashboard.categories.delete')}
                     >
                       <Trash2 className={`h-5 w-5 ${category.products_count > 0 ? 'opacity-50 cursor-not-allowed' : ''}`} />
                     </button>
@@ -182,13 +180,13 @@ const Categories = () => {
         {/* Empty State */}
         {categories?.data?.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-500">No categories found.</div>
+            <div className="text-gray-500">{t('dashboard.categories.no_categories')}</div>
             <button
               onClick={handleAdd}
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Category
+              <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {t('dashboard.categories.add_first')}
             </button>
           </div>
         )}

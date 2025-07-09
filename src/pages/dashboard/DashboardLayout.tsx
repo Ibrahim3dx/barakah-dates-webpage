@@ -28,7 +28,8 @@ const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -42,7 +43,7 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Mobile sidebar toggle */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      <div className={`lg:hidden fixed top-4 z-50 ${isRTL ? 'right-4' : 'left-4'}`}>
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="p-2 rounded-md bg-white shadow-md"
@@ -53,12 +54,12 @@ const DashboardLayout = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
         }`}
       >
         <div className="h-16 flex items-center justify-center border-b">
-          <h1 className="text-xl font-bold text-gray-800">Barakah Dates</h1>
+          <h1 className="text-xl font-bold text-gray-800">تمور البركة</h1>
         </div>
         <nav className="mt-5 px-2">
           {navigation.map((item) => {
@@ -76,7 +77,7 @@ const DashboardLayout = () => {
                 }
               >
                 <item.icon
-                  className={`mr-4 h-6 w-6 ${
+                  className={`${isRTL ? 'ml-4' : 'mr-4'} h-6 w-6 ${
                     isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
                   }`}
                 />
@@ -91,29 +92,29 @@ const DashboardLayout = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="w-full justify-start">
-                <User className="mr-2 h-5 w-5" />
-                <span className="truncate">{user?.name || 'User'}</span>
+                <User className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
+                <span className="truncate">{user?.name || t('dashboard.profile.my_account')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('dashboard.profile.my_account')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/dashboard/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
+                  <User className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                  {t('dashboard.profile.profile')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/dashboard/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  <Settings className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                  {t('nav.settings')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                <LogOut className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+                {t('dashboard.profile.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -121,7 +122,7 @@ const DashboardLayout = () => {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className={`${isRTL ? 'lg:pr-64' : 'lg:pl-64'}`}>
         <main className="py-6 px-4 sm:px-6 lg:px-8">
           <Outlet />
         </main>

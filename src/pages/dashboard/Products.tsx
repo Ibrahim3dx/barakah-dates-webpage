@@ -4,6 +4,7 @@ import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import ProductForm from '@/components/dashboard/ProductForm';
 import api from '@/lib/api';
 import { Product, ProductsResponse } from '@/types/dashboard';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Currency formatter for Libyan Dinar
 const formatCurrency = (amount: string | number) => {
@@ -16,6 +17,8 @@ const Products = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
 
   const { data: products, isLoading } = useQuery<ProductsResponse>({
     queryKey: ['products', searchQuery],
@@ -56,26 +59,26 @@ const Products = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Products</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.products.title')}</h1>
         <button
           onClick={handleAdd}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Product
+          <Plus className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {t('dashboard.products.add_product')}
         </button>
       </div>
 
       {/* Search Bar */}
       <div className="max-w-lg w-full">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
             <Search className="h-5 w-5 text-gray-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Search products..."
+            className={`block w-full ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+            placeholder={t('dashboard.products.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -88,23 +91,23 @@ const Products = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.name')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.category')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.price')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.stock')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.status')}
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th className={`px-6 py-3 ${isRTL ? 'text-left' : 'text-right'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.products.actions')}
                 </th>
               </tr>
             </thead>
@@ -120,7 +123,7 @@ const Products = () => {
                           alt={product.name}
                         />
                       </div>
-                      <div className="ml-4">
+                      <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>
                         <div className="text-sm font-medium text-gray-900">
                           {product.name}
                         </div>
@@ -131,7 +134,7 @@ const Products = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.category ? product.category.name : 'No Category'}
+                    {product.category ? product.category.name : t('dashboard.products.no_category')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatCurrency(product.price)}
@@ -147,7 +150,7 @@ const Products = () => {
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {product.is_active ? 'Active' : 'Inactive'}
+                      {product.is_active ? t('dashboard.products.active') : t('dashboard.products.inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

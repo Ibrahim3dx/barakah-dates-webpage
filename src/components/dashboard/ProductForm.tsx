@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Category {
   id: number;
@@ -29,6 +30,8 @@ interface ProductFormProps {
 }
 
 const ProductForm = ({ product, onClose }: ProductFormProps) => {
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -133,10 +136,10 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-        <div className="flex justify-between items-center mb-4">
+      <div className={`bg-white rounded-lg p-6 max-w-2xl w-full ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`flex justify-between items-center mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h2 className="text-xl font-semibold">
-            {product ? 'Edit Product' : 'Add New Product'}
+            {product ? t('dashboard.products.edit_product') : t('dashboard.products.add_product')}
           </h2>
           <button
             onClick={onClose}
@@ -146,13 +149,14 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">{
+          /* Name Field */}
           <div>
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Name
+              {t('dashboard.products.name')} *
             </label>
             <input
               type="text"
@@ -160,17 +164,18 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
               id="name"
               value={formData.name}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               required
             />
           </div>
 
+          {/* Description Field */}
           <div>
             <label
               htmlFor="description"
               className="block text-sm font-medium text-gray-700"
             >
-              Description
+              {t('common.description')}
             </label>
             <textarea
               name="description"
@@ -178,27 +183,28 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               required
             />
           </div>
 
+          {/* Category Field */}
           <div>
             <label
               htmlFor="category_id"
               className="block text-sm font-medium text-gray-700"
             >
-              Category
+              {t('dashboard.products.category')} *
             </label>
             <select
               name="category_id"
               id="category_id"
               value={formData.category_id}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               required
             >
-              <option value="">Select a category</option>
+              <option value="">{t('forms.select_category')}</option>
               {categories?.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -207,13 +213,14 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             </select>
           </div>
 
+          {/* Price Fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="price"
                 className="block text-sm font-medium text-gray-700"
               >
-                Price
+                {t('common.price')} *
               </label>
               <input
                 type="number"
@@ -222,7 +229,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 value={formData.price}
                 onChange={handleChange}
                 step="0.01"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
                 required
               />
             </div>
@@ -232,7 +239,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 htmlFor="wholesale_price"
                 className="block text-sm font-medium text-gray-700"
               >
-                Wholesale Price
+                {t('forms.wholesale_price')}
               </label>
               <input
                 type="number"
@@ -241,19 +248,19 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 value={formData.wholesale_price}
                 onChange={handleChange}
                 step="0.01"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               />
             </div>
           </div>
 
+          {/* Wholesale Threshold and Stock */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="wholesale_threshold"
                 className="block text-sm font-medium text-gray-700"
               >
-                Wholesale Threshold
+                {t('forms.wholesale_threshold')}
               </label>
               <input
                 type="number"
@@ -261,8 +268,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 id="wholesale_threshold"
                 value={formData.wholesale_threshold}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
               />
             </div>
 
@@ -271,7 +277,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 htmlFor="stock"
                 className="block text-sm font-medium text-gray-700"
               >
-                Stock
+                {t('dashboard.products.stock')} *
               </label>
               <input
                 type="number"
@@ -279,35 +285,37 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 id="stock"
                 value={formData.stock}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
                 required
               />
             </div>
           </div>
 
+          {/* Image Field */}
           <div>
             <label
               htmlFor="image"
               className="block text-sm font-medium text-gray-700"
             >
-              Product Image
+              {t('forms.product_image')}
             </label>
             <input
               type="file"
               name="image"
               id="image"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
-              className="mt-1 block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
+              className={`mt-1 block w-full text-sm text-gray-500
+                file:${isRTL ? 'ml-4' : 'mr-4'} file:py-2 file:px-4
                 file:rounded-md file:border-0
                 file:text-sm file:font-semibold
                 file:bg-indigo-50 file:text-indigo-700
-                hover:file:bg-indigo-100"
+                hover:file:bg-indigo-100`}
               accept="image/*"
             />
           </div>
 
-          <div className="flex items-center">
+          {/* Active Checkbox */}
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
             <input
               type="checkbox"
               name="is_active"
@@ -319,29 +327,30 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                   is_active: e.target.checked,
                 }))
               }
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              className={`h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${isRTL ? 'ml-2' : 'mr-2'}`}
             />
             <label
               htmlFor="is_active"
-              className="ml-2 block text-sm text-gray-900"
+              className="block text-sm text-gray-900"
             >
-              Active
+              {t('common.active')}
             </label>
           </div>
 
-          <div className="flex justify-end space-x-3">
+          {/* Action Buttons */}
+          <div className={`flex justify-end space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {mutation.isPending ? 'Saving...' : 'Save'}
+              {mutation.isPending ? t('forms.saving') : t('common.save')}
             </button>
           </div>
         </form>
