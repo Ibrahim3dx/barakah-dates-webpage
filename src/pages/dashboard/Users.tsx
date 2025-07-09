@@ -15,9 +15,11 @@ const Users = () => {
     queryKey: ['users', searchQuery, roleFilter],
     queryFn: async () => {
       try {
-        const response = await api.get(
-          `/api/users?search=${searchQuery}&role=${roleFilter}`
-        );
+        const params = new URLSearchParams();
+        if (searchQuery) params.append('search', searchQuery);
+        if (roleFilter && roleFilter !== 'all') params.append('role', roleFilter);
+
+        const response = await api.get(`/api/users?${params.toString()}`);
         return response.data;
       } catch (error) {
         throw new Error('Failed to fetch users');
@@ -92,39 +94,47 @@ const Users = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users?.data?.map((user: any) => (
-                <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {user.roles?.[0]?.name === 'admin' ? t('dashboard.users.admin') :
-                       user.roles?.[0]?.name === 'user' ? t('dashboard.users.user') :
-                       user.roles?.[0]?.name || t('dashboard.users.user')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button className="text-indigo-600 hover:text-indigo-900">
-                        <Eye className="h-5 w-5" />
-                      </button>
-                      <button className="text-yellow-600 hover:text-yellow-900">
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </div>
+              {users?.data?.length > 0 ? (
+                users.data.map((user: any) => (
+                  <tr key={user.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{user.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {user.roles?.[0]?.name === 'admin' ? t('dashboard.users.admin') :
+                         user.roles?.[0]?.name === 'user' ? t('dashboard.users.user') :
+                         user.roles?.[0]?.name || t('dashboard.users.user')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap ${isRTL ? 'text-left' : 'text-right'} text-sm font-medium`}>
+                      <div className={`flex ${isRTL ? 'justify-start space-x-reverse' : 'justify-end'} space-x-2`}>
+                        <button className="text-indigo-600 hover:text-indigo-900">
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button className="text-yellow-600 hover:text-yellow-900">
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button className="text-red-600 hover:text-red-900">
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
+                    {t('dashboard.users.no_users')}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

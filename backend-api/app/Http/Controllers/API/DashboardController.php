@@ -15,21 +15,33 @@ class DashboardController extends Controller
 {
     public function stats(Request $request)
     {
-        $period = $request->get('period', 'today');
-        $startDate = $this->getStartDate($period);
+        $period = $request->get('period', 'month'); // Changed default from 'today' to 'month'
+        $from = $request->get('from');
+        $to = $request->get('to');
+
+        // If date range is provided, use it; otherwise use period
+        if ($from && $to) {
+            $startDate = Carbon::parse($from)->startOfDay();
+            $endDate = Carbon::parse($to)->endOfDay();
+        } else {
+            $startDate = $this->getStartDate($period);
+            $endDate = now();
+        }
 
         $stats = [
-            'total_orders' => Order::where('created_at', '>=', $startDate)->count(),
+            'total_orders' => Order::whereBetween('created_at', [$startDate, $endDate])->count(),
             'total_products' => Product::count(),
             'total_users' => User::count(),
-            'total_revenue' => Order::where('created_at', '>=', $startDate)
+            'total_revenue' => Order::whereBetween('created_at', [$startDate, $endDate])
                 ->where('payment_status', 'paid')
                 ->sum('total_amount'),
-            'total_profit' => $this->calculateProfit($startDate),
-            'average_order_value' => $this->calculateAverageOrderValue($startDate),
-            'top_products' => $this->getTopProducts($startDate, 5),
-            'order_status_distribution' => $this->getOrderStatusDistribution($startDate),
-            'payment_method_distribution' => $this->getPaymentMethodDistribution($startDate)
+            'total_profit' => $this->calculateProfit($startDate, $endDate),
+            'average_order_value' => $this->calculateAverageOrderValue($startDate, $endDate),
+            'top_products' => $this->getTopProducts($startDate, $endDate, 5),
+            'order_status_distribution' => $this->getOrderStatusDistribution($startDate, $endDate),
+            'payment_method_distribution' => $this->getPaymentMethodDistribution($startDate, $endDate),
+            'recent_orders' => $this->getRecentOrders(5),
+            'low_stock_products' => $this->getLowStockProducts(10) // Products with stock <= 10
         ];
 
         return response()->json($stats);
@@ -38,19 +50,29 @@ class DashboardController extends Controller
     public function revenue(Request $request)
     {
         $period = $request->get('period', 'monthly');
-        $startDate = $this->getStartDate($period);
+        $from = $request->get('from');
+        $to = $request->get('to');
 
-        $revenue = Order::where('created_at', '>=', $startDate)
+        // If date range is provided, use it; otherwise use period
+        if ($from && $to) {
+            $startDate = Carbon::parse($from)->startOfDay();
+            $endDate = Carbon::parse($to)->endOfDay();
+        } else {
+            $startDate = $this->getStartDate($period);
+            $endDate = now();
+        }
+
+        $revenue = Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('payment_status', 'paid')
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_amount) as total')
+                DB::raw('SUM(total_amount) as amount')
             )
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        return response()->json($revenue);
+        return response()->json(['data' => $revenue]);
     }
 
     public function orders()
@@ -85,31 +107,51 @@ class DashboardController extends Controller
     public function profit(Request $request)
     {
         $period = $request->get('period', 'monthly');
-        $startDate = $this->getStartDate($period);
+        $from = $request->get('from');
+        $to = $request->get('to');
 
-        $profit = OrderItem::whereHas('order', function ($query) use ($startDate) {
-                $query->where('created_at', '>=', $startDate)
+        // If date range is provided, use it; otherwise use period
+        if ($from && $to) {
+            $startDate = Carbon::parse($from)->startOfDay();
+            $endDate = Carbon::parse($to)->endOfDay();
+        } else {
+            $startDate = $this->getStartDate($period);
+            $endDate = now();
+        }
+
+        $profit = OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
                     ->where('payment_status', 'paid');
             })
             ->select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_price - (unit_price * quantity)) as total_profit')
+                DB::raw('SUM(total_price - (unit_price * quantity)) as amount')
             )
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        return response()->json($profit);
+        return response()->json(['data' => $profit]);
     }
 
     public function bestSellers(Request $request)
     {
         $period = $request->get('period', 'monthly');
-        $startDate = $this->getStartDate($period);
+        $from = $request->get('from');
+        $to = $request->get('to');
         $limit = $request->get('limit', 10);
 
-        $bestSellers = OrderItem::whereHas('order', function ($query) use ($startDate) {
-                $query->where('created_at', '>=', $startDate)
+        // If date range is provided, use it; otherwise use period
+        if ($from && $to) {
+            $startDate = Carbon::parse($from)->startOfDay();
+            $endDate = Carbon::parse($to)->endOfDay();
+        } else {
+            $startDate = $this->getStartDate($period);
+            $endDate = now();
+        }
+
+        $bestSellers = OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
                     ->where('payment_status', 'paid');
             })
             ->select(
@@ -138,26 +180,26 @@ class DashboardController extends Controller
         };
     }
 
-    private function calculateProfit(Carbon $startDate): float
+    private function calculateProfit(Carbon $startDate, Carbon $endDate): float
     {
-        return OrderItem::whereHas('order', function ($query) use ($startDate) {
-                $query->where('created_at', '>=', $startDate)
+        return OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
                     ->where('payment_status', 'paid');
             })
             ->sum(DB::raw('total_price - (unit_price * quantity)'));
     }
 
-    private function calculateAverageOrderValue(Carbon $startDate): float
+    private function calculateAverageOrderValue(Carbon $startDate, Carbon $endDate): float
     {
-        return Order::where('created_at', '>=', $startDate)
+        return Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('payment_status', 'paid')
             ->avg('total_amount') ?? 0;
     }
 
-    private function getTopProducts(Carbon $startDate, int $limit = 5): array
+    private function getTopProducts(Carbon $startDate, Carbon $endDate, int $limit = 5): array
     {
-        return OrderItem::whereHas('order', function ($query) use ($startDate) {
-                $query->where('created_at', '>=', $startDate)
+        return OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
                     ->where('payment_status', 'paid');
             })
             ->select(
@@ -173,21 +215,41 @@ class DashboardController extends Controller
             ->toArray();
     }
 
-    private function getOrderStatusDistribution(Carbon $startDate): array
+    private function getOrderStatusDistribution(Carbon $startDate, Carbon $endDate): array
     {
-        return Order::where('created_at', '>=', $startDate)
+        return Order::whereBetween('created_at', [$startDate, $endDate])
             ->select('order_status', DB::raw('count(*) as count'))
             ->groupBy('order_status')
             ->get()
             ->toArray();
     }
 
-    private function getPaymentMethodDistribution(Carbon $startDate): array
+    private function getPaymentMethodDistribution(Carbon $startDate, Carbon $endDate): array
     {
-        return Order::where('created_at', '>=', $startDate)
+        return Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('payment_status', 'paid')
             ->select('payment_method', DB::raw('count(*) as count'))
             ->groupBy('payment_method')
+            ->get()
+            ->toArray();
+    }
+
+    private function getRecentOrders(int $limit = 5): array
+    {
+        return Order::with(['user:id,name,email'])
+            ->select('id', 'customer_name', 'customer_email', 'total_amount', 'order_status', 'payment_status', 'created_at', 'user_id')
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->toArray();
+    }
+
+    private function getLowStockProducts(int $threshold = 10): array
+    {
+        return Product::where('stock', '<=', $threshold)
+            ->where('is_active', true)
+            ->select('id', 'name', 'stock', 'retail_price as price')
+            ->orderBy('stock', 'asc')
             ->get()
             ->toArray();
     }

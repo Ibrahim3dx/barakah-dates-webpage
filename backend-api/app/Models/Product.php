@@ -38,7 +38,7 @@ class Product extends Model
     // Accessor for price - returns retail_price
     public function getPriceAttribute(): float
     {
-        return $this->retail_price;
+        return (float) ($this->retail_price ?? 0);
     }
 
     // Mutator for price - sets retail_price

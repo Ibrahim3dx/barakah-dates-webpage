@@ -23,9 +23,11 @@ const Orders = () => {
   const { data: orders, isLoading } = useQuery<OrdersResponse>({
     queryKey: ['orders', searchQuery, statusFilter],
     queryFn: async () => {
-      const response = await api.get(
-        `/api/orders?search=${searchQuery}&status=${statusFilter}`
-      );
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+
+      const response = await api.get(`/api/orders?${params.toString()}`);
       return response.data;
     },
   });
@@ -105,66 +107,74 @@ const Orders = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {orders?.data?.map((order: Order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    #{order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{order.customer_name}</div>
-                    <div className="text-sm text-gray-500">{order.customer_email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatCurrency(order.total_amount)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.order_status === 'completed'
-                          ? 'bg-green-100 text-green-800'
-                          : order.order_status === 'cancelled'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {t(`dashboard.order_status.${order.order_status}`) || order.order_status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.payment_status === 'paid'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {order.payment_status === 'paid' ? t('dashboard.orders.paid') :
-                       order.payment_status === 'pending' ? t('dashboard.orders.unpaid') :
-                       order.payment_status === 'failed' ? t('dashboard.orders.refunded') :
-                       order.payment_status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingOrder(order);
-                          setShowOrderForm(true);
-                        }}
-                        className="text-indigo-600 hover:text-indigo-900"
+              {orders?.data?.length > 0 ? (
+                orders.data.map((order: Order) => (
+                  <tr key={order.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      #{order.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{order.customer_name}</div>
+                      <div className="text-sm text-gray-500">{order.customer_email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatCurrency(order.total_amount)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          order.order_status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : order.order_status === 'cancelled'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
                       >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button className="text-indigo-600 hover:text-indigo-900">
-                        <Eye className="h-5 w-5" />
-                      </button>
-                    </div>
+                        {t(`dashboard.order_status.${order.order_status}`) || order.order_status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          order.payment_status === 'paid'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {order.payment_status === 'paid' ? t('dashboard.orders.paid') :
+                         order.payment_status === 'pending' ? t('dashboard.orders.unpaid') :
+                         order.payment_status === 'failed' ? t('dashboard.orders.refunded') :
+                         order.payment_status}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap ${isRTL ? 'text-left' : 'text-right'} text-sm font-medium`}>
+                      <div className={`flex ${isRTL ? 'justify-start space-x-reverse' : 'justify-end'} space-x-2`}>
+                        <button
+                          onClick={() => {
+                            setEditingOrder(order);
+                            setShowOrderForm(true);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button className="text-indigo-600 hover:text-indigo-900">
+                          <Eye className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                    {t('dashboard.orders.no_orders')}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
