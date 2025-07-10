@@ -421,12 +421,7 @@
     "wholesale_threshold": "Wholesale Threshold",
     "product_image": "Product Image",
     "saving": "Saving...",
-    "category_description_placeholder": "Enter category description...",
-    "edit_order": "Edit Order",
-    "customer_phone": "Customer Phone",
-    "shipping_address": "Shipping Address",
-    "payment_failed": "Failed",
-    "notes": "Notes",
-    "save_order": "Save Order"
+    "retail_buying_price": "Retail Buying Price",
+    "wholesale_buying_price": "Wholesale Buying Price"
   }
 }

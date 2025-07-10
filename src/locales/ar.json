@@ -432,15 +432,17 @@
   "forms": {
     "select_category": "اختر فئة",
     "wholesale_price": "سعر الجملة",
-    "wholesale_threshold": "حد الجملة",
+    "wholesale_threshold": "عتبة البيع بالجملة",
     "product_image": "صورة المنتج",
-    "saving": "جاري الحفظ...",
+    "saving": "جارٍ الحفظ...",
     "category_description_placeholder": "أدخل وصف الفئة...",
     "edit_order": "تعديل الطلب",
     "customer_phone": "هاتف العميل",
     "shipping_address": "عنوان الشحن",
     "payment_failed": "فشل",
     "notes": "ملاحظات",
-    "save_order": "حفظ الطلب"
+    "save_order": "حفظ الطلب",
+    "retail_buying_price": "سعر الشراء بالتجزئة",
+    "wholesale_buying_price": "سعر الشراء بالجملة"
   }
 }

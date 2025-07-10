@@ -47,6 +47,30 @@ class DashboardController extends Controller
         return response()->json($stats);
     }
 
+    private function calculateProfit($startDate, $endDate)
+    {
+        $orderItems = OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate])
+                  ->where('payment_status', 'paid');
+        })->with('product')->get();
+
+        $totalProfit = 0;
+
+        foreach ($orderItems as $item) {
+            if ($item->product) {
+                $costPrice = $item->is_wholesale
+                    ? ($item->product->wholesale_buying_price ?? $item->product->retail_buying_price ?? 0)
+                    : ($item->product->retail_buying_price ?? 0);
+
+                $sellingPrice = $item->unit_price;
+                $profitPerItem = $sellingPrice - $costPrice;
+                $totalProfit += $profitPerItem * $item->quantity;
+            }
+        }
+
+        return $totalProfit;
+    }
+
     public function revenue(Request $request)
     {
         $period = $request->get('period', 'monthly');
@@ -178,15 +202,6 @@ class DashboardController extends Controller
             'year' => Carbon::now()->subYear(),
             default => Carbon::now()->subMonth()
         };
-    }
-
-    private function calculateProfit(Carbon $startDate, Carbon $endDate): float
-    {
-        return OrderItem::whereHas('order', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate])
-                    ->where('payment_status', 'paid');
-            })
-            ->sum(DB::raw('total_price - (unit_price * quantity)'));
     }
 
     private function calculateAverageOrderValue(Carbon $startDate, Carbon $endDate): float

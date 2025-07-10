@@ -18,6 +18,8 @@ interface Product {
   category_id: number;
   price: number;
   wholesale_price?: number;
+  retail_buying_price?: number;
+  wholesale_buying_price?: number;
   wholesale_threshold?: number;
   stock: number;
   is_active: boolean;
@@ -38,6 +40,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     category_id: product?.category_id?.toString() || '',
     price: product?.price?.toString() || '',
     wholesale_price: product?.wholesale_price?.toString() || '',
+    retail_buying_price: product?.retail_buying_price?.toString() || '',
+    wholesale_buying_price: product?.wholesale_buying_price?.toString() || '',
     wholesale_threshold: product?.wholesale_threshold?.toString() || '',
     stock: product?.stock?.toString() || '',
     is_active: product?.is_active ?? true,
@@ -116,6 +120,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       category_id: parseInt(formData.category_id) || null,
       price: parseFloat(formData.price.toString()) || 0,
       wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price.toString()) : null,
+      retail_buying_price: formData.retail_buying_price ? parseFloat(formData.retail_buying_price.toString()) : null,
+      wholesale_buying_price: formData.wholesale_buying_price ? parseFloat(formData.wholesale_buying_price.toString()) : null,
       wholesale_threshold: formData.wholesale_threshold ? parseInt(formData.wholesale_threshold.toString()) : null,
       stock: parseInt(formData.stock.toString()) || 0,
       is_active: formData.is_active
@@ -246,6 +252,45 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 name="wholesale_price"
                 id="wholesale_price"
                 value={formData.wholesale_price}
+                onChange={handleChange}
+                step="0.01"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+              />
+            </div>
+          </div>
+
+          {/* Buying Price Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="retail_buying_price"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {t('forms.retail_buying_price')}
+              </label>
+              <input
+                type="number"
+                name="retail_buying_price"
+                id="retail_buying_price"
+                value={formData.retail_buying_price}
+                onChange={handleChange}
+                step="0.01"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="wholesale_buying_price"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {t('forms.wholesale_buying_price')}
+              </label>
+              <input
+                type="number"
+                name="wholesale_buying_price"
+                id="wholesale_buying_price"
+                value={formData.wholesale_buying_price}
                 onChange={handleChange}
                 step="0.01"
                 className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
