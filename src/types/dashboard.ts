@@ -20,6 +20,8 @@ export interface Product {
   retail_price: number;
   price: number; // accessor for frontend compatibility
   wholesale_price?: number;
+  retail_buying_price?: number;
+  wholesale_buying_price?: number;
   wholesale_threshold?: number;
   stock: number; // matches the database field name
   image_url?: string;

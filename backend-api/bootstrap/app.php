@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
+        // Enable CORS for API routes
+        $middleware->api(append: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
+
         // Enable method override for forms
         $middleware->web(append: [
             \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,

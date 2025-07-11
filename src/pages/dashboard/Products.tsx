@@ -38,8 +38,16 @@ const Products = () => {
     },
   });
 
-  const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
+  const handleEdit = async (product: Product) => {
+    // Fetch full product data to ensure we have all fields including buying prices
+    try {
+      const response = await api.get(`/api/products/${product.id}`);
+      setSelectedProduct(response.data);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      // Fallback to using the product from the list
+      setSelectedProduct(product);
+    }
     setIsFormOpen(true);
   };
 

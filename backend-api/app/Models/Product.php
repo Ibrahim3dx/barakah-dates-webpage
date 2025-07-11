@@ -17,6 +17,8 @@ class Product extends Model
         'category_id',
         'retail_price',
         'wholesale_price',
+        'retail_buying_price',
+        'wholesale_buying_price',
         'wholesale_threshold',
         'stock',
         'image',
@@ -27,6 +29,8 @@ class Product extends Model
         'category_id' => 'integer',
         'retail_price' => 'decimal:2',
         'wholesale_price' => 'decimal:2',
+        'retail_buying_price' => 'decimal:2',
+        'wholesale_buying_price' => 'decimal:2',
         'wholesale_threshold' => 'integer',
         'stock' => 'integer',
         'is_active' => 'boolean'

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
@@ -35,17 +35,49 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   const [formData, setFormData] = useState({
-    name: product?.name || '',
-    description: product?.description || '',
-    category_id: product?.category_id?.toString() || '',
-    price: product?.price?.toString() || '',
-    wholesale_price: product?.wholesale_price?.toString() || '',
-    retail_buying_price: product?.retail_buying_price?.toString() || '',
-    wholesale_buying_price: product?.wholesale_buying_price?.toString() || '',
-    wholesale_threshold: product?.wholesale_threshold?.toString() || '',
-    stock: product?.stock?.toString() || '',
-    is_active: product?.is_active ?? true,
+    name: '',
+    description: '',
+    category_id: '',
+    price: '',
+    wholesale_price: '',
+    retail_buying_price: '',
+    wholesale_buying_price: '',
+    wholesale_threshold: '',
+    stock: '',
+    is_active: true,
   });
+
+  // Update form data when product prop changes
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || '',
+        description: product.description || '',
+        category_id: product.category_id?.toString() || '',
+        price: product.price?.toString() || '',
+        wholesale_price: product.wholesale_price?.toString() || '',
+        retail_buying_price: product.retail_buying_price?.toString() || '',
+        wholesale_buying_price: product.wholesale_buying_price?.toString() || '',
+        wholesale_threshold: product.wholesale_threshold?.toString() || '',
+        stock: product.stock?.toString() || '',
+        is_active: product.is_active ?? true,
+      });
+    } else {
+      // Reset form for new product
+      setFormData({
+        name: '',
+        description: '',
+        category_id: '',
+        price: '',
+        wholesale_price: '',
+        retail_buying_price: '',
+        wholesale_buying_price: '',
+        wholesale_threshold: '',
+        stock: '',
+        is_active: true,
+      });
+    }
+  }, [product]);
 
   const [image, setImage] = useState<File | null>(null);
   const queryClient = useQueryClient();
@@ -74,7 +106,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           // If updating with new image, use FormData with POST + method override
           const formData = new FormData();
           Object.entries(data).forEach(([key, value]) => {
-            formData.append(key, value.toString());
+            if (value !== null && value !== undefined) {
+              formData.append(key, value.toString());
+            }
           });
           formData.append('image', image);
           formData.append('_method', 'PUT');
@@ -90,7 +124,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         // Creating new product
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
-          formData.append(key, value.toString());
+          if (value !== null && value !== undefined) {
+            formData.append(key, value.toString());
+          }
         });
         if (image) {
           formData.append('image', image);
@@ -119,13 +155,17 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       description: formData.description,
       category_id: parseInt(formData.category_id) || null,
       price: parseFloat(formData.price.toString()) || 0,
-      wholesale_price: formData.wholesale_price ? parseFloat(formData.wholesale_price.toString()) : null,
-      retail_buying_price: formData.retail_buying_price ? parseFloat(formData.retail_buying_price.toString()) : null,
-      wholesale_buying_price: formData.wholesale_buying_price ? parseFloat(formData.wholesale_buying_price.toString()) : null,
-      wholesale_threshold: formData.wholesale_threshold ? parseInt(formData.wholesale_threshold.toString()) : null,
+      wholesale_price: formData.wholesale_price && formData.wholesale_price.trim() !== '' ? parseFloat(formData.wholesale_price.toString()) : null,
+      retail_buying_price: formData.retail_buying_price && formData.retail_buying_price.trim() !== '' ? parseFloat(formData.retail_buying_price.toString()) : null,
+      wholesale_buying_price: formData.wholesale_buying_price && formData.wholesale_buying_price.trim() !== '' ? parseFloat(formData.wholesale_buying_price.toString()) : null,
+      wholesale_threshold: formData.wholesale_threshold && formData.wholesale_threshold.trim() !== '' ? parseInt(formData.wholesale_threshold.toString()) : null,
       stock: parseInt(formData.stock.toString()) || 0,
       is_active: formData.is_active
     };
+
+    // Debug: Log the data being sent
+    console.log('Form data being sent:', dataToSend);
+    console.log('Current form state:', formData);
 
     mutation.mutate(dataToSend);
   };
