@@ -127,111 +127,115 @@ const MyOrders = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">{t('order.myOrders.title')}</h1>
-      </div>
-
-      {orders.length === 0 ? (
-        <div className="text-center py-16">
-          <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">{t('order.myOrders.noOrders')}</h2>
-          <p className="text-gray-600 mb-8">{t('order.myOrders.noOrdersMessage')}</p>
-          <Link to="/products">
-            <Button>{t('order.myOrders.startShopping')}</Button>
-          </Link>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">{t('order.myOrders.title')}</h1>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {orders.map((order) => (
-            <Card key={order.id} className="overflow-hidden">
-              <CardHeader className="bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">
-                      Order #{order.order_number}
-                    </CardTitle>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <CalendarDays className="h-4 w-4" />
-                        {formatDate(order.created_at)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CreditCard className="h-4 w-4" />
-                        {order.payment_method}
+
+        {orders.length === 0 ? (
+          <div className="text-center py-24">
+            <Package className="h-20 w-20 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('order.myOrders.noOrders')}</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">{t('order.myOrders.noOrdersMessage')}</p>
+            <Link to="/products">
+              <Button size="lg">{t('order.myOrders.startShopping')}</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map((order) => (
+              <Card key={order.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+                <CardHeader className="bg-gray-50 border-b p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                    <div className="space-y-3">
+                      <CardTitle className="text-xl font-semibold text-gray-900">
+                        Order #{order.order_number}
+                      </CardTitle>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="h-4 w-4" />
+                          <span>{formatDate(order.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          <span className="capitalize">{order.payment_method}</span>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex flex-col sm:items-end gap-3">
+                      <Badge className={`${getStatusColor(order.order_status)} px-3 py-1`}>
+                        {order.order_status}
+                      </Badge>
+                      <span className="text-xl font-bold text-gray-900">{formatCurrency(order.total_amount)}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Badge className={getStatusColor(order.order_status)}>
-                      {order.order_status}
-                    </Badge>
-                    <span className="text-lg font-bold">{formatCurrency(order.total_amount)}</span>
-                  </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Order Items */}
-                  <div>
-                    <h3 className="font-semibold mb-3">{t('order.myOrders.itemsOrdered')}</h3>
-                    <div className="space-y-3">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {/* Order Items */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-3 mb-4">{t('order.myOrders.itemsOrdered')}</h3>
+                      <div className="space-y-3">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex justify-between items-start p-4 bg-gray-50 rounded-lg border border-gray-100">
+                            <div className="flex-1 min-w-0 pe-4">
+                              <p className="font-medium text-gray-900 mb-2 leading-tight">{item.product.name}</p>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <p className="text-sm text-gray-600">
+                                  {t('order.myOrders.quantity')}: <span className="font-medium">{item.quantity}</span>
+                                </p>
+                                {item.is_wholesale && (
+                                  <Badge variant="secondary" className="text-xs py-1">{t('order.myOrders.wholesale')}</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-end flex-shrink-0">
+                              <p className="font-semibold text-gray-900 mb-1">{formatCurrency(item.unit_price)}</p>
+                              <p className="text-sm text-gray-600">
+                                {t('order.myOrders.total')}: <span className="font-medium">{formatCurrency(parseFloat(item.unit_price) * item.quantity)}</span>
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Delivery Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-3 mb-4">{t('order.myOrders.deliveryInfo')}</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-4 rounded-lg bg-gray-50 border border-gray-100">
+                          <MapPin className="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-700 mb-2">{t('order.myOrders.shippingAddress')}</p>
+                            <p className="text-gray-900 break-words leading-relaxed">{order.shipping_address}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-4 rounded-lg bg-gray-50 border border-gray-100">
+                          <Phone className="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
                           <div>
-                            <p className="font-medium">{item.product.name}</p>
-                            <p className="text-sm text-gray-600">
-                              {t('order.myOrders.quantity')}: {item.quantity}
-                              {item.is_wholesale && (
-                                <Badge variant="secondary" className="ml-2">{t('order.myOrders.wholesale')}</Badge>
-                              )}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{formatCurrency(item.unit_price)}</p>
-                            <p className="text-sm text-gray-600">
-                              {t('order.myOrders.total')}: {formatCurrency(parseFloat(item.unit_price) * item.quantity)}
-                            </p>
+                            <p className="text-sm font-medium text-gray-700 mb-2">{t('order.myOrders.phone')}</p>
+                            <p className="text-gray-900">{order.customer_phone}</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Delivery Information */}
-                  <div>
-                    <h3 className="font-semibold mb-3">{t('order.myOrders.deliveryInfo')}</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-1 text-gray-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">{t('order.myOrders.shippingAddress')}</p>
-                          <p className="font-medium">{order.shipping_address}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-gray-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">{t('order.myOrders.phone')}</p>
-                          <p className="font-medium">{order.customer_phone}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-gray-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">{t('order.myOrders.email')}</p>
-                          <p className="font-medium">{order.customer_email}</p>
+                        <div className="flex items-start gap-3 p-4 rounded-lg bg-gray-50 border border-gray-100">
+                          <Mail className="h-5 w-5 mt-0.5 text-gray-500 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-700 mb-2">{t('order.myOrders.email')}</p>
+                            <p className="text-gray-900 break-words">{order.customer_email}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

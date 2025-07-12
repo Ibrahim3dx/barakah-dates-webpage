@@ -184,7 +184,7 @@
     },
     "confirmation": {
       "title": "Order Confirmed",
-      "message": "Thank you for your order. We'll send you an email with the order details.",
+      "message": "Thank you for your order.",
       "details": "Order Details",
       "orderNumber": "Order Number",
       "date": "Order Date",

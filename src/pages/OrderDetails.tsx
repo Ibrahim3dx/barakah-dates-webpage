@@ -111,79 +111,92 @@ const OrderDetails = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Order #{order.order_number}</h1>
-              <p className="text-gray-600">
-                Placed on {new Date(order.created_at).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              {getStatusIcon(order.status)}
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Shipping Information</h2>
-              <p className="text-gray-600">{order.shipping_address}</p>
-              <p className="text-gray-600">
-                {order.shipping_city}, {order.shipping_state} {order.shipping_zip_code}
-              </p>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Payment Information</h2>
-              <p className="text-gray-600">
-                Method: {order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1)}
-              </p>
-              <p className="text-gray-600">
-                Status: {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
-              </p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          {/* Header Section */}
+          <div className="p-6 sm:p-8 border-b bg-gray-50">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+              <div className="space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Order #{order.order_number}</h1>
+                <p className="text-gray-600 text-base sm:text-lg">
+                  Placed on {new Date(order.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {getStatusIcon(order.status)}
+                <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="border-t pt-6">
-            <h2 className="text-lg font-semibold mb-4">Order Items</h2>
-            <div className="space-y-4">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex items-center space-x-4">
-                  <img
-                    src={item.product.image_url}
-                    alt={item.product.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-medium">{item.product.name}</h3>
-                    <p className="text-gray-600">Quantity: {item.quantity}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{formatCurrency((item.price * item.quantity))}</p>
-                    <p className="text-sm text-gray-600">{formatCurrency(item.price)} each</p>
-                  </div>
+          {/* Information Grid */}
+          <div className="p-6 sm:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 border-b pb-3">Shipping Information</h2>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-2">
+                  <p className="font-medium text-gray-900 leading-relaxed">{order.shipping_address}</p>
+                  <p className="text-gray-600">
+                    {order.shipping_city}, {order.shipping_state} {order.shipping_zip_code}
+                  </p>
                 </div>
-              ))}
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900 border-b pb-3">Payment Information</h2>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-3">
+                  <p className="text-gray-900">
+                    <span className="font-medium">Method:</span> {order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1)}
+                  </p>
+                  <p className="text-gray-900">
+                    <span className="font-medium">Status:</span> {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="border-t mt-6 pt-6">
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold">Total</span>
-              <span className="text-2xl font-bold">{formatCurrency(order.total_amount)}</span>
+            {/* Order Items */}
+            <div className="border-t pt-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 border-b pb-3">Order Items</h2>
+              <div className="space-y-4">
+                {order.items.map((item) => (
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <img
+                      src={item.product.image_url}
+                      alt={item.product.name}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0 mx-auto sm:mx-0"
+                    />
+                    <div className="flex-1 min-w-0 text-center sm:text-start">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-2 leading-tight">{item.product.name}</h3>
+                      <p className="text-gray-600">Quantity: <span className="font-medium">{item.quantity}</span></p>
+                    </div>
+                    <div className="text-center sm:text-end flex-shrink-0">
+                      <p className="font-semibold text-lg text-gray-900 mb-1">{formatCurrency((item.price * item.quantity))}</p>
+                      <p className="text-sm text-gray-600">{formatCurrency(item.price)} each</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="border-t mt-8 pt-6">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50 p-6 rounded-lg">
+                <span className="text-xl font-semibold text-gray-900">Total Amount</span>
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">{formatCurrency(order.total_amount)}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-center space-x-4">
-          <Button onClick={() => window.print()}>
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+          <Button onClick={() => window.print()} size="lg" className="min-w-[150px]">
             Print Order
           </Button>
-          <Button variant="outline" onClick={() => window.history.back()}>
+          <Button variant="outline" onClick={() => window.history.back()} size="lg" className="min-w-[150px]">
             Back to Orders
           </Button>
         </div>
