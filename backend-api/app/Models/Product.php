@@ -20,7 +20,8 @@ class Product extends Model
         'wholesale_threshold',
         'stock',
         'image',
-        'is_active'
+        'is_active',
+        'is_always_in_stock'
     ];
 
     protected $casts = [
@@ -29,7 +30,8 @@ class Product extends Model
         'wholesale_price' => 'decimal:2',
         'wholesale_threshold' => 'integer',
         'stock' => 'integer',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'is_always_in_stock' => 'boolean'
     ];
 
     // Add price and image_url to appends so they're included in JSON responses
