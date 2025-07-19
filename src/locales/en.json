@@ -70,6 +70,7 @@
     "search": "Search products...",
     "add_to_cart": "Add to Cart",
     "out_of_stock": "Out of Stock",
+    "inStock": "In Stock",
     "price": "Price",
     "wholesale_price": "Wholesale Price",
     "wholesale_threshold": "Wholesale Threshold",

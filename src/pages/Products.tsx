@@ -22,6 +22,7 @@ interface Product {
   wholesale_price?: string;
   wholesale_threshold?: number;
   stock: number;
+  is_always_in_stock: boolean;
   category?: {
     id: number;
     name: string;
@@ -102,7 +103,7 @@ const Products = () => {
       wholesale_price: product.wholesale_price ? parseFloat(product.wholesale_price) : undefined,
       wholesale_threshold: product.wholesale_threshold,
       image_url: product.image_url,
-      stock: product.stock
+      stock: product.is_always_in_stock ? 999 : product.stock
     };
 
     addToCart(cartProduct);
@@ -246,7 +247,11 @@ const Products = () => {
                     )}
                   </div>
                   <span className="text-xs text-gray-500">
-                    {t('products.stock')}: {product.stock}
+                    {product.is_always_in_stock
+                      ? product.stock > 0
+                        ? t('products.inStock')
+                        : t('products.outOfStock')
+                      : `${t('products.stock')}: ${product.stock}`}
                   </span>
                 </div>
 

@@ -73,6 +73,7 @@
     "addedToCart": "تمت إضافته إلى السلة",
     "out_of_stock": "غير متوفر",
     "outOfStock": "غير متوفر",
+    "inStock": "متوفر",
     "price": "السعر",
     "wholesale_price": "سعر الجملة",
     "wholesale_threshold": "حد الجملة",
