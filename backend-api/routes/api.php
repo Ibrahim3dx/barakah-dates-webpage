@@ -28,6 +28,8 @@ use App\Http\Controllers\Auth\RegisterController;
 // Public routes
 Route::post('/auth/login', [LoginController::class, 'login'])->name('login');
 Route::post('/auth/register', [RegisterController::class, 'register']);
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
 // Public product routes
 Route::get('/products', [ProductController::class, 'index']);
@@ -52,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
 
     // Dashboard routes
     Route::middleware('permission:view-dashboard')->group(function () {
@@ -142,4 +145,30 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.payments.initiate');
     Route::get('/orders/{order}/payments/verify', [PaymentController::class, 'verifyPayment'])
         ->name('api.payments.verify');
+});
+
+// Test route for password reset functionality (remove in production)
+Route::get('/test-reset-email', function () {
+    try {
+        $user = \App\Models\User::first();
+        if (!$user) {
+            return response()->json(['error' => 'No users found'], 404);
+        }
+
+        $token = \Illuminate\Support\Str::random(60);
+        $resetUrl = config('app.frontend_url') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+
+        $subject = 'إعادة تعيين كلمة المرور - Password Reset | Al Baraka Dates';
+        $emailContent = "Test password reset email\n\nReset URL: {$resetUrl}";
+
+        \Illuminate\Support\Facades\Mail::raw($emailContent, function ($message) use ($user, $subject) {
+            $message->to($user->email)
+                   ->subject($subject)
+                   ->from(config('mail.from.address'), config('mail.from.name'));
+        });
+
+        return response()->json(['message' => 'Test password reset email sent successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to send email: ' . $e->getMessage()], 500);
+    }
 });

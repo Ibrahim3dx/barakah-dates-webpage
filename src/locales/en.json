@@ -212,31 +212,69 @@
     "logout_success": "Logout successful",
     "login": {
       "title": "Sign In",
-      "subtitle": "or",
-      "createAccount": "Create a new account",
+      "subtitle": "Enter your credentials to access your account",
       "email": "Email",
+      "emailPlaceholder": "Enter your email",
       "password": "Password",
+      "passwordPlaceholder": "Enter your password",
       "submit": "Sign In",
       "loading": "Signing in...",
       "success": "Logged in successfully",
       "error": "Invalid email or password",
       "noAccount": "Don't have an account?",
-      "register": "Create one"
+      "register": "Sign up",
+      "forgotPassword": "Forgot your password?"
     },
     "register": {
       "title": "Create Account",
-      "subtitle": "or",
-      "signIn": "Sign in to your account",
+      "subtitle": "Enter your details to create your account",
       "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
       "email": "Email",
+      "emailPlaceholder": "Enter your email",
       "password": "Password",
+      "passwordPlaceholder": "Enter your password",
       "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
       "submit": "Create Account",
       "loading": "Creating account...",
       "success": "Account created successfully",
       "error": "Failed to create account",
       "haveAccount": "Already have an account?",
       "login": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email address",
+      "submit": "Send Reset Link",
+      "loading": "Sending...",
+      "success": "Password reset link sent to your email",
+      "error": "Failed to send reset link",
+      "backToLogin": "Back to Sign In"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Enter your new password",
+      "password": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Reset Password",
+      "loading": "Resetting...",
+      "success": "Password reset successfully",
+      "error": "Failed to reset password",
+      "backToLogin": "Back to Sign In"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "description": "Enter your current password and choose a new one",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Change Password",
+      "loading": "Changing Password...",
+      "success": "Password changed successfully",
+      "error": "Failed to change password"
     }
   },
   "dashboard": {
@@ -414,6 +452,20 @@
     "date": "Date",
     "created_at": "Created At",
     "updated_at": "Updated At"
+  },
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading settings...",
+    "accountSettings": "Account Settings",
+    "applicationSettings": "Application Settings",
+    "password": "Password",
+    "passwordDescription": "Change your account password",
+    "changePassword": "Change Password",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "updateSuccess": "Setting updated successfully",
+    "updateError": "Failed to update setting"
   },
   "forms": {
     "select_category": "Select a category",

@@ -11,8 +11,11 @@ import Products from './pages/Products';
 import Categories from './components/Categories';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+import ChangePassword from './pages/auth/ChangePassword';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import DashboardProducts from './pages/dashboard/Products';
@@ -44,8 +47,22 @@ function App() {
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
                   <Route path="order-confirmation" element={<OrderConfirmation />} />
                   <Route path="my-orders" element={<MyOrders />} />
+                </Route>
+
+                {/* Protected Auth Routes */}
+                <Route path="/" element={<Navbar />}>
+                  <Route
+                    path="change-password"
+                    element={
+                      <ProtectedRoute>
+                        <ChangePassword />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Route>
 
                 {/* Protected Dashboard Routes */}
