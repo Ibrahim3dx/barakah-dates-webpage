@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -13,6 +14,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'category_id',
         'retail_price',
@@ -38,6 +40,41 @@ class Product extends Model
 
     // Add price and image_url to appends so they're included in JSON responses
     protected $appends = ['price', 'image_url'];
+
+    /**
+     * Boot method to auto-generate slug
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            if (empty($product->slug)) {
+                $product->slug = $product->generateUniqueSlug($product->name);
+            }
+        });
+
+        static::updating(function ($product) {
+            if ($product->isDirty('name') && empty($product->slug)) {
+                $product->slug = $product->generateUniqueSlug($product->name);
+            }
+        });
+    }
+
+    /**
+     * Generate a unique slug for the product
+     */
+    public function generateUniqueSlug($name)
+    {
+        $slug = Str::slug($name);
+        $count = static::where('slug', $slug)->count();
+
+        if ($count > 0) {
+            $slug = $slug . '-' . ($count + 1);
+        }
+
+        return $slug;
+    }
 
     // Accessor for price - returns retail_price
     public function getPriceAttribute(): float

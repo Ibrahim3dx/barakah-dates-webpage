@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,6 +22,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+  const { login, user } = useAuth();
   const isRTL = language === 'ar';
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,31 +34,25 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const loginMutation = useMutation({
+    const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
-      return response.json();
+      // Use the AuthContext login method
+      await login(data.email, data.password);
+      return { success: true };
     },
-    onSuccess: (data) => {
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token);
-      // Store user data if needed
-      localStorage.setItem('user', JSON.stringify(data.user));
-
+    onSuccess: () => {
       toast.success(t('auth.login.success') || 'Login successful');
-      navigate('/dashboard');
+
+      // Check if user is admin after login (user state should be updated)
+      // We need to get the updated user from context
+      // Note: This might need a small delay to ensure state is updated
+      setTimeout(() => {
+        if (user && user.is_admin) {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 100);
     },
     onError: (error: Error) => {
       toast.error(error.message || t('auth.login.error') || 'Login failed');

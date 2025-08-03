@@ -24,12 +24,16 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|email',
                 'password' => 'required',
+            ], [
+                'email.required' => 'البريد الإلكتروني مطلوب.',
+                'email.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+                'password.required' => 'كلمة المرور مطلوبة.',
             ]);
 
             if (!Auth::attempt($request->only('email', 'password'))) {
                 Log::warning('Failed login attempt', ['email' => $request->email]);
                 throw ValidationException::withMessages([
-                    'email' => ['The provided credentials are incorrect.'],
+                    'email' => ['البيانات المدخلة غير صحيحة.'],
                 ]);
             }
 
@@ -38,7 +42,7 @@ class AuthController extends Controller
             if (!$user) {
                 Log::error('User not found after successful authentication', ['email' => $request->email]);
                 throw ValidationException::withMessages([
-                    'email' => ['User not found.'],
+                    'email' => ['المستخدم غير موجود.'],
                 ]);
             }
 
@@ -47,7 +51,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'token' => $token,
-                'user' => $user,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_admin' => $user->isSuperAdmin(),
+                    'roles' => $user->getRoleNames(),
+                ],
             ]);
         } catch (ValidationException $e) {
             Log::warning('Validation error during login', [
@@ -61,7 +71,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred during login.',
+                'message' => 'حدث خطأ أثناء تسجيل الدخول.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -84,8 +94,15 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8',
                 'password_confirmation' => 'required|same:password',
             ], [
-                'password_confirmation.same' => 'The password confirmation does not match.',
-                'password.min' => 'The password must be at least 8 characters.',
+                'name.required' => 'الاسم مطلوب.',
+                'name.max' => 'الاسم يجب أن يكون أقل من 255 حرف.',
+                'email.required' => 'البريد الإلكتروني مطلوب.',
+                'email.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+                'email.unique' => 'هذا البريد الإلكتروني مسجل مسبقاً.',
+                'password.required' => 'كلمة المرور مطلوبة.',
+                'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
+                'password_confirmation.required' => 'تأكيد كلمة المرور مطلوب.',
+                'password_confirmation.same' => 'تأكيد كلمة المرور غير متطابق.',
             ]);
 
             $user = User::create([
@@ -97,7 +114,7 @@ class AuthController extends Controller
             Log::info('User registered successfully', ['user_id' => $user->id]);
 
             return response()->json([
-                'message' => 'User registered successfully',
+                'message' => 'تم تسجيل المستخدم بنجاح',
                 'user' => $user,
             ], 201);
         } catch (ValidationException $e) {
@@ -113,7 +130,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred during registration.',
+                'message' => 'حدث خطأ أثناء التسجيل.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -125,14 +142,14 @@ class AuthController extends Controller
             Log::info('Logout attempt', ['user_id' => $request->user()->id]);
             $request->user()->currentAccessToken()->delete();
             Log::info('User logged out successfully', ['user_id' => $request->user()->id]);
-            return response()->json(['message' => 'Logged out successfully']);
+            return response()->json(['message' => 'تم تسجيل الخروج بنجاح']);
         } catch (\Exception $e) {
             Log::error('Logout error', [
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred during logout.',
+                'message' => 'حدث خطأ أثناء تسجيل الخروج.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -141,15 +158,23 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         try {
-            Log::info('Fetching user data', ['user_id' => $request->user()->id]);
-            return response()->json($request->user());
+            $user = $request->user();
+            Log::info('Fetching user data', ['user_id' => $user->id]);
+
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_admin' => $user->isSuperAdmin(),
+                'roles' => $user->getRoleNames(),
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching user data', [
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred while fetching user data.',
+                'message' => 'حدث خطأ أثناء جلب بيانات المستخدم.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -299,7 +324,7 @@ class AuthController extends Controller
             if (!$passwordReset || !Hash::check($request->token, $passwordReset->token)) {
                 Log::warning('Invalid reset token', ['email' => $request->email]);
                 return response()->json([
-                    'message' => 'Invalid or expired reset token.'
+                    'message' => 'رمز إعادة التعيين غير صالح أو منتهي الصلاحية.'
                 ], 400);
             }
 
@@ -308,7 +333,7 @@ class AuthController extends Controller
                 Log::warning('Expired reset token', ['email' => $request->email]);
                 DB::table('password_reset_tokens')->where('email', $request->email)->delete();
                 return response()->json([
-                    'message' => 'Reset token has expired. Please request a new one.'
+                    'message' => 'انتهت صلاحية رمز إعادة التعيين. يرجى طلب رمز جديد.'
                 ], 400);
             }
 
@@ -324,7 +349,7 @@ class AuthController extends Controller
             Log::info('Password reset successful', ['user_id' => $user->id]);
 
             return response()->json([
-                'message' => 'Password has been reset successfully.'
+                'message' => 'تم إعادة تعيين كلمة المرور بنجاح.'
             ]);
 
         } catch (ValidationException $e) {
@@ -339,7 +364,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred while resetting your password.',
+                'message' => 'حدث خطأ أثناء إعادة تعيين كلمة المرور.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -354,8 +379,10 @@ class AuthController extends Controller
                 'current_password' => 'required|string',
                 'password' => 'required|string|min:8|confirmed',
             ], [
-                'password.confirmed' => 'The password confirmation does not match.',
-                'password.min' => 'The password must be at least 8 characters.',
+                'current_password.required' => 'كلمة المرور الحالية مطلوبة.',
+                'password.required' => 'كلمة المرور الجديدة مطلوبة.',
+                'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
+                'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
             ]);
 
             $user = $request->user();
@@ -364,7 +391,7 @@ class AuthController extends Controller
             if (!Hash::check($request->current_password, $user->password)) {
                 Log::warning('Incorrect current password', ['user_id' => $user->id]);
                 return response()->json([
-                    'message' => 'Current password is incorrect.'
+                    'message' => 'كلمة المرور الحالية غير صحيحة.'
                 ], 400);
             }
 
@@ -376,7 +403,7 @@ class AuthController extends Controller
             Log::info('Password changed successfully', ['user_id' => $user->id]);
 
             return response()->json([
-                'message' => 'Password has been changed successfully.'
+                'message' => 'تم تغيير كلمة المرور بنجاح.'
             ]);
 
         } catch (ValidationException $e) {
@@ -391,7 +418,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage()
             ]);
             return response()->json([
-                'message' => 'An error occurred while changing your password.',
+                'message' => 'حدث خطأ أثناء تغيير كلمة المرور.',
                 'error' => $e->getMessage()
             ], 500);
         }

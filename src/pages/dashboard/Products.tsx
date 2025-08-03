@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, CheckSquare, Square, MoreVertical } from 'lucide-react';
 import ProductForm from '@/components/dashboard/ProductForm';
 import api from '@/lib/api';
 import { Product, ProductsResponse } from '@/types/dashboard';
@@ -16,6 +16,9 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showBatchActions, setShowBatchActions] = useState(false);
   const queryClient = useQueryClient();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -31,6 +34,17 @@ const Products = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await api.delete(`/api/products/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setProductToDelete(null);
+    },
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: number; is_active: boolean }) => {
+      const response = await api.patch(`/api/products/${id}/status`, { is_active });
       return response.data;
     },
     onSuccess: () => {
@@ -56,6 +70,110 @@ const Products = () => {
     setIsFormOpen(true);
   };
 
+  const handleToggleStatus = (product: Product) => {
+    toggleStatusMutation.mutate({
+      id: product.id,
+      is_active: !product.is_active,
+    });
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setProductToDelete(product);
+  };
+
+  const handleConfirmDelete = () => {
+    if (productToDelete) {
+      deleteMutation.mutate(productToDelete.id);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setProductToDelete(null);
+  };
+
+  const handleSelectProduct = (productId: number) => {
+    setSelectedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && products?.data) {
+      setSelectedProducts(products.data.map(product => product.id));
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const batchActivateMutation = useMutation({
+    mutationFn: async (is_active: boolean) => {
+      await Promise.all(
+        selectedProducts.map(id =>
+          api.patch(`/api/products/${id}/status`, { is_active })
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setSelectedProducts([]);
+    },
+  });
+
+  const batchStockMutation = useMutation({
+    mutationFn: async (stock: number) => {
+      await Promise.all(
+        selectedProducts.map(id =>
+          api.patch(`/api/products/${id}/stock`, { stock })
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setSelectedProducts([]);
+    },
+  });
+
+  const batchDeleteMutation = useMutation({
+    mutationFn: async () => {
+      await Promise.all(
+        selectedProducts.map(id =>
+          api.delete(`/api/products/${id}`)
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setSelectedProducts([]);
+      setShowBatchActions(false);
+    },
+  });
+
+  const handleBatchAction = (action: string) => {
+    switch (action) {
+      case 'activate':
+        batchActivateMutation.mutate(true);
+        break;
+      case 'deactivate':
+        batchActivateMutation.mutate(false);
+        break;
+      case 'instock':
+        batchStockMutation.mutate(1);
+        break;
+      case 'outofstock':
+        batchStockMutation.mutate(0);
+        break;
+      case 'delete':
+        setShowBatchActions(true);
+        break;
+    }
+  };
+
+  const handleConfirmBatchDelete = () => {
+    batchDeleteMutation.mutate();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -67,7 +185,53 @@ const Products = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.products.title')}</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.products.title')}</h1>
+          {selectedProducts.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                {selectedProducts.length} {t('dashboard.products.selected')}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleBatchAction('activate')}
+                  disabled={batchActivateMutation.isPending}
+                  className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 disabled:opacity-50"
+                >
+                  {t('dashboard.products.batch_activate')}
+                </button>
+                <button
+                  onClick={() => handleBatchAction('deactivate')}
+                  disabled={batchActivateMutation.isPending}
+                  className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {t('dashboard.products.batch_deactivate')}
+                </button>
+                <button
+                  onClick={() => handleBatchAction('instock')}
+                  disabled={batchStockMutation.isPending}
+                  className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 disabled:opacity-50"
+                >
+                  {t('dashboard.products.batch_instock')}
+                </button>
+                <button
+                  onClick={() => handleBatchAction('outofstock')}
+                  disabled={batchStockMutation.isPending}
+                  className="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 disabled:opacity-50"
+                >
+                  {t('dashboard.products.batch_outofstock')}
+                </button>
+                <button
+                  onClick={() => handleBatchAction('delete')}
+                  disabled={batchDeleteMutation.isPending}
+                  className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md hover:bg-red-200 disabled:opacity-50"
+                >
+                  {t('common.delete')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         <button
           onClick={handleAdd}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -99,6 +263,22 @@ const Products = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left">
+                  <button
+                    onClick={(e) => handleSelectAll((e.target as HTMLInputElement).checked)}
+                    className="flex items-center"
+                  >
+                    {selectedProducts.length === products?.data?.length && products?.data?.length > 0 ? (
+                      <CheckSquare className="h-4 w-4 text-indigo-600" />
+                    ) : selectedProducts.length > 0 ? (
+                      <div className="h-4 w-4 bg-indigo-600 rounded-sm flex items-center justify-center">
+                        <div className="h-2 w-2 bg-white rounded-sm"></div>
+                      </div>
+                    ) : (
+                      <Square className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                </th>
                 <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                   {t('dashboard.products.name')}
                 </th>
@@ -121,7 +301,19 @@ const Products = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {products?.data?.map((product: Product) => (
-                <tr key={product.id}>
+                <tr key={product.id} className={selectedProducts.includes(product.id) ? 'bg-indigo-50' : ''}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleSelectProduct(product.id)}
+                      className="flex items-center"
+                    >
+                      {selectedProducts.includes(product.id) ? (
+                        <CheckSquare className="h-4 w-4 text-indigo-600" />
+                      ) : (
+                        <Square className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
@@ -148,18 +340,28 @@ const Products = () => {
                     {formatCurrency(product.price)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.stock}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.is_active
+                        product.stock > 0
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {product.is_active ? t('dashboard.products.active') : t('dashboard.products.inactive')}
+                      {product.stock > 0 ? t('dashboard.products.in_stock') || 'In Stock' : t('dashboard.products.out_of_stock') || 'Out of Stock'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleToggleStatus(product)}
+                      disabled={toggleStatusMutation.isPending}
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer transition-colors hover:opacity-80 disabled:opacity-50 ${
+                        product.is_active
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                          : 'bg-red-100 text-red-800 hover:bg-red-200'
+                      }`}
+                    >
+                      {product.is_active ? t('dashboard.products.active') : t('dashboard.products.inactive')}
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -170,7 +372,7 @@ const Products = () => {
                     </button>
                     <button
                       className="text-red-600 hover:text-red-900"
-                      onClick={() => deleteMutation.mutate(product.id)}
+                      onClick={() => handleDeleteClick(product)}
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -191,6 +393,80 @@ const Products = () => {
             setSelectedProduct(null);
           }}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">
+                {t('dashboard.products.delete_confirmation') || 'Delete Product'}
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  {t('dashboard.products.delete_confirmation_message') || 'Are you sure you want to delete'} <strong>"{productToDelete.name}"</strong>? {t('dashboard.products.delete_warning') || 'This action cannot be undone.'}
+                </p>
+              </div>
+              <div className="flex justify-center gap-4 mt-4">
+                <button
+                  onClick={handleCancelDelete}
+                  disabled={deleteMutation.isPending}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
+                >
+                  {t('common.cancel') || 'Cancel'}
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={deleteMutation.isPending}
+                  className="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {deleteMutation.isPending ? (t('common.deleting') || 'Deleting...') : (t('common.delete') || 'Delete')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Delete Confirmation Modal */}
+      {showBatchActions && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">
+                {t('dashboard.products.batch_delete_confirmation') || 'Delete Products'}
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  {t('dashboard.products.batch_delete_message') || 'Are you sure you want to delete'} <strong>{selectedProducts.length}</strong> {t('dashboard.products.batch_delete_products') || 'products'}? {t('dashboard.products.delete_warning') || 'This action cannot be undone.'}
+                </p>
+              </div>
+              <div className="flex justify-center gap-4 mt-4">
+                <button
+                  onClick={() => setShowBatchActions(false)}
+                  disabled={batchDeleteMutation.isPending}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
+                >
+                  {t('common.cancel') || 'Cancel'}
+                </button>
+                <button
+                  onClick={handleConfirmBatchDelete}
+                  disabled={batchDeleteMutation.isPending}
+                  className="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {batchDeleteMutation.isPending ? (t('common.deleting') || 'Deleting...') : (t('common.delete') || 'Delete')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

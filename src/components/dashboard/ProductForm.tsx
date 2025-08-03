@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
@@ -43,7 +43,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     retail_buying_price: '',
     wholesale_buying_price: '',
     wholesale_threshold: '',
-    stock: '',
+    stock: '1', // Default to in stock
     is_active: true,
   });
 
@@ -59,7 +59,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         retail_buying_price: product.retail_buying_price?.toString() || '',
         wholesale_buying_price: product.wholesale_buying_price?.toString() || '',
         wholesale_threshold: product.wholesale_threshold?.toString() || '',
-        stock: product.stock?.toString() || '',
+        stock: product.stock > 0 ? '1' : '0',
         is_active: product.is_active ?? true,
       });
     } else {
@@ -73,13 +73,14 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         retail_buying_price: '',
         wholesale_buying_price: '',
         wholesale_threshold: '',
-        stock: '',
+        stock: '1', // Default to in stock
         is_active: true,
       });
     }
   }, [product]);
 
   const [image, setImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   // Fetch categories for the dropdown
@@ -142,7 +143,34 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      onClose();
+
+      // If it's a new product (no product prop), reset form but keep open
+      if (!product) {
+        // Reset form data after successful submission
+        setFormData({
+          name: '',
+          description: '',
+          category_id: '',
+          price: '',
+          wholesale_price: '',
+          retail_buying_price: '',
+          wholesale_buying_price: '',
+          wholesale_threshold: '',
+          stock: '1', // Default to in stock
+          is_active: true,
+        });
+
+        // Reset image state and file input
+        setImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+
+        // Don't close the form, keep it open for adding more products
+      } else {
+        // If editing an existing product, close the form
+        onClose();
+      }
     },
   });
 
@@ -358,21 +386,30 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             </div>
 
             <div>
-              <label
-                htmlFor="stock"
-                className="block text-sm font-medium text-gray-700"
-              >
-                {t('dashboard.products.stock')} *
-              </label>
-              <input
-                type="number"
-                name="stock"
-                id="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
-                required
-              />
+              <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <input
+                  type="checkbox"
+                  name="in_stock"
+                  id="in_stock"
+                  checked={parseInt(formData.stock) > 0}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      stock: e.target.checked ? '1' : '0',
+                    }))
+                  }
+                  className={`h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${isRTL ? 'ml-2' : 'mr-2'}`}
+                />
+                <label
+                  htmlFor="in_stock"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  {t('dashboard.products.in_stock') || 'In Stock'}
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {t('dashboard.products.stock_help') || 'Check if the product is currently available'}
+              </p>
             </div>
           </div>
 
@@ -385,6 +422,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
               {t('forms.product_image')}
             </label>
             <input
+              ref={fileInputRef}
               type="file"
               name="image"
               id="image"

@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::post('/products/{product}', [ProductController::class, 'update']); // For multipart/form-data with _method override
         Route::patch('/products/{product}/stock', [ProductController::class, 'updateStock']);
+        Route::patch('/products/{product}/status', [ProductController::class, 'updateStatus']);
     });
 
     Route::middleware('permission:delete-products')->group(function () {

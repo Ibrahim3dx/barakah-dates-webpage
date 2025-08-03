@@ -147,6 +147,20 @@ class ProductController extends Controller
         ]);
     }
 
+    public function updateStatus(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'is_active' => 'required|boolean'
+        ]);
+
+        $product->update($validated);
+
+        return response()->json([
+            'message' => 'Status updated successfully',
+            'product' => $product
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
