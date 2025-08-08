@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -174,6 +175,109 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Product deleted successfully'
+        ]);
+    }
+
+    /**
+     * Import products from a CSV file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        if (!$handle) {
+            return response()->json(['message' => 'Unable to open uploaded file'], 422);
+        }
+
+        $requiredHeaders = [
+            'name', 'description', 'price', 'wholesale_price', 'wholesale_threshold', 'stock', 'is_active'
+        ];
+
+        $header = fgetcsv($handle);
+        if (!$header) {
+            return response()->json(['message' => 'Empty CSV file'], 422);
+        }
+        $normalizedHeader = array_map(fn($h) => strtolower(trim($h)), $header);
+
+        foreach ($requiredHeaders as $req) {
+            if (!in_array($req, $normalizedHeader, true)) {
+                return response()->json([
+                    'message' => 'Invalid header. Missing: ' . $req,
+                    'expected' => $requiredHeaders,
+                    'got' => $normalizedHeader
+                ], 422);
+            }
+        }
+
+        $indexes = array_flip($normalizedHeader);
+        $created = 0; $updated = 0; $rows = 0; $errors = [];
+
+        DB::beginTransaction();
+        try {
+            while (($row = fgetcsv($handle)) !== false) {
+                $rows++;
+                if (count(array_filter($row)) === 0) { // skip empty line
+                    continue;
+                }
+                try {
+                    $data = [];
+                    foreach ($requiredHeaders as $col) {
+                        $data[$col] = $row[$indexes[$col]] ?? null;
+                    }
+
+                    // Basic sanitation & casting
+                    $payload = [
+                        'name' => trim($data['name'] ?? ''),
+                        'description' => $data['description'] ?? null,
+                        'price' => is_numeric($data['price']) ? (float)$data['price'] : null,
+                        'wholesale_price' => is_numeric($data['wholesale_price']) ? (float)$data['wholesale_price'] : null,
+                        'wholesale_threshold' => is_numeric($data['wholesale_threshold']) ? (int)$data['wholesale_threshold'] : null,
+                        'stock' => is_numeric($data['stock']) ? (int)$data['stock'] : 0,
+                        'is_active' => isset($data['is_active']) ? (filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? 0) : 1
+                    ];
+
+                    if ($payload['name'] === '' || $payload['price'] === null) {
+                        throw new \Exception('Missing required name or price');
+                    }
+
+                    $product = Product::where('name', $payload['name'])->first();
+                    if ($product) {
+                        $product->update($payload);
+                        $updated++;
+                    } else {
+                        Product::create($payload);
+                        $created++;
+                    }
+                } catch (\Throwable $e) {
+                    $errors[] = [
+                        'row' => $rows + 1, // account for header
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Import failed',
+                'error' => $e->getMessage()
+            ], 500);
+        } finally {
+            fclose($handle);
+        }
+
+        return response()->json([
+            'message' => 'Import completed',
+            'summary' => [
+                'total_rows_processed' => $rows,
+                'created' => $created,
+                'updated' => $updated,
+                'errors' => $errors
+            ]
         ]);
     }
 }

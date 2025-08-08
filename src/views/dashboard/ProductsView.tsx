@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Package,
   Search,
@@ -26,8 +26,11 @@ const ProductsView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
+  const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery<ProductsResponse>({
     queryKey: ['products', searchQuery, categoryFilter, statusFilter],
@@ -49,6 +52,60 @@ const ProductsView = () => {
       return response.data.data;
     },
   });
+
+  const importMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await api.post('/api/products/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['products']);
+      alert(`Import completed: ${data.summary.created} created, ${data.summary.updated} updated`);
+      setImporting(false);
+    },
+    onError: (error: any) => {
+      console.error('Import error:', error);
+      alert('Import failed: ' + (error.response?.data?.message || error.message));
+      setImporting(false);
+    },
+  });
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImporting(true);
+      importMutation.mutate(file);
+    }
+  };
+
+  const downloadSample = async () => {
+    try {
+      const response = await api.get('/api/products/import/sample', {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'sample_products.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download sample file');
+    }
+  };
 
   const formatCurrency = (amount: string | number) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -80,14 +137,28 @@ const ProductsView = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          <button 
+            onClick={downloadSample}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
             <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('common.export') || 'Export'}
+            {t('common.download_sample') || 'Download Sample'}
           </button>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          <button 
+            onClick={handleImport}
+            disabled={importing}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
             <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('common.import') || 'Import'}
+            {importing ? (t('common.importing') || 'Importing...') : (t('common.import') || 'Import')}
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
           <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
             <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t('dashboard.products.add_product') || 'Add Product'}

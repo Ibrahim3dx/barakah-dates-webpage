@@ -1,0 +1,6 @@
+name,description,price,wholesale_price,wholesale_threshold,stock,is_active
+Premium Dates,High quality dates from Libya,10.00,8.50,50,200,1
+Classic Dates,Regular quality dates,7.00,5.50,100,500,1
+Organic Dates,Organic certified dates,15.00,12.00,30,150,1
+Stuffed Dates,Dates stuffed with almonds,20.00,18.00,25,75,1
+Date Syrup,Natural date syrup 500ml,12.00,10.00,40,100,1

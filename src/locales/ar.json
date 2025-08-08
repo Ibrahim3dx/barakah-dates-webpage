@@ -481,7 +481,23 @@
     "quantity": "الكمية",
     "date": "التاريخ",
     "created_at": "تاريخ الإنشاء",
-    "updated_at": "تاريخ التحديث"
+    "updated_at": "تاريخ التحديث",
+    "import": "استيراد",
+    "export": "تصدير",
+    "download_sample": "تحميل نموذج",
+    "importing": "جاري الاستيراد...",
+    "exporting": "جاري التصدير...",
+    "export_sales": "تصدير المبيعات",
+    "upload_file": "رفع ملف",
+    "file_upload": "رفع الملف",
+    "select_file": "اختر ملف",
+    "filter": "تصفية",
+    "previous": "السابق",
+    "next": "التالي",
+    "showing": "عرض",
+    "to": "إلى",
+    "of": "من",
+    "results": "نتيجة"
   },
   "settings": {
     "title": "الإعدادات",
@@ -511,6 +527,8 @@
     "notes": "ملاحظات",
     "save_order": "حفظ الطلب",
     "retail_buying_price": "سعر الشراء بالتجزئة",
-    "wholesale_buying_price": "سعر الشراء بالجملة"
+    "wholesale_buying_price": "سعر الشراء بالجملة",
+    "all_categories": "جميع الفئات",
+    "all_statuses": "جميع الحالات"
   }
 }

@@ -24,6 +24,7 @@ use App\Http\Controllers\Auth\RegisterController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+use App\Models\Order;
 
 // Public routes
 Route::post('/auth/login', [LoginController::class, 'login'])->name('login');
@@ -68,6 +69,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Product management routes
     Route::middleware('permission:create-products')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
+        Route::post('/products/import', [ProductController::class, 'import']);
+        Route::get('/products/import/sample', function () {
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="sample_products.csv"'
+            ];
+            $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active\n" .
+                      "Premium Dates,High quality dates,10.00,8.50,50,200,1\n" .
+                      "Classic Dates,Regular quality dates,7.00,5.50,100,500,1\n";
+            return response($sample, 200, $headers);
+        });
     });
 
     Route::middleware('permission:edit-products')->group(function () {
@@ -90,6 +102,47 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:manage-orders')->group(function () {
         Route::put('/orders/{order}', [OrderController::class, 'update']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    });
+
+    // Export sales (orders) CSV
+    Route::middleware('permission:view-orders')->group(function () {
+        Route::get('/orders/export/csv', function () {
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="sales_export.csv"'
+            ];
+            $callback = function () {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, [
+                    'order_id','date','customer_name','customer_email','customer_phone','total_amount','payment_status','order_status','is_wholesale','product_name','quantity','unit_price','line_total'
+                ]);
+                Order::with(['items.product'])
+                    ->orderByDesc('id')
+                    ->chunk(100, function ($orders) use ($handle) {
+                        foreach ($orders as $order) {
+                            foreach ($order->items as $item) {
+                                fputcsv($handle, [
+                                    $order->id,
+                                    $order->created_at?->toDateTimeString(),
+                                    $order->customer_name,
+                                    $order->customer_email,
+                                    $order->customer_phone,
+                                    $order->total_amount,
+                                    $order->payment_status,
+                                    $order->order_status,
+                                    $order->is_wholesale ? '1' : '0',
+                                    $item->product?->name,
+                                    $item->quantity,
+                                    $item->unit_price,
+                                    $item->total_price
+                                ]);
+                            }
+                        }
+                    });
+                fclose($handle);
+            };
+            return response()->stream($callback, 200, $headers);
+        });
     });
 
     // User management routes
@@ -148,28 +201,8 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.payments.verify');
 });
 
-// Test route for password reset functionality (remove in production)
-Route::get('/test-reset-email', function () {
-    try {
-        $user = \App\Models\User::first();
-        if (!$user) {
-            return response()->json(['error' => 'No users found'], 404);
-        }
-
-        $token = \Illuminate\Support\Str::random(60);
-        $resetUrl = config('app.frontend_url') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
-
-        $subject = 'إعادة تعيين كلمة المرور - Password Reset | Al Baraka Dates';
-        $emailContent = "Test password reset email\n\nReset URL: {$resetUrl}";
-
-        \Illuminate\Support\Facades\Mail::raw($emailContent, function ($message) use ($user, $subject) {
-            $message->to($user->email)
-                   ->subject($subject)
-                   ->from(config('mail.from.address'), config('mail.from.name'));
-        });
-
-        return response()->json(['message' => 'Test password reset email sent successfully']);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Failed to send email: ' . $e->getMessage()], 500);
-    }
-});
+// Payment callback routes (no auth required)
+Route::post('/payments/massarat/callback', [PaymentController::class, 'handleMassarATCallback'])
+    ->name('api.payments.massarat.callback');
+Route::post('/payments/paypal/callback', [PaymentController::class, 'handlePayPalCallback'])
+    ->name('api.payments.paypal.callback');

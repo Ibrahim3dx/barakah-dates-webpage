@@ -467,7 +467,23 @@
     "quantity": "Quantity",
     "date": "Date",
     "created_at": "Created At",
-    "updated_at": "Updated At"
+    "updated_at": "Updated At",
+    "import": "Import",
+    "export": "Export",
+    "download_sample": "Download Sample",
+    "importing": "Importing...",
+    "exporting": "Exporting...",
+    "export_sales": "Export Sales",
+    "upload_file": "Upload File",
+    "file_upload": "File Upload",
+    "select_file": "Select File",
+    "filter": "Filter",
+    "previous": "Previous",
+    "next": "Next",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results"
   },
   "settings": {
     "title": "Settings",
@@ -490,6 +506,8 @@
     "product_image": "Product Image",
     "saving": "Saving...",
     "retail_buying_price": "Retail Buying Price",
-    "wholesale_buying_price": "Wholesale Buying Price"
+    "wholesale_buying_price": "Wholesale Buying Price",
+    "all_categories": "All Categories",
+    "all_statuses": "All Statuses"
   }
 }
