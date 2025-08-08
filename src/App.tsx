@@ -26,6 +26,7 @@ import DashboardSettings from './pages/dashboard/Settings';
 import OrderConfirmation from './pages/OrderConfirmation';
 import MyOrders from './pages/MyOrders';
 import Index from './pages/Index';
+import Sales from './pages/dashboard/Sales';
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ function App() {
                   <Route path="orders" element={<DashboardOrders />} />
                   <Route path="users" element={<DashboardUsers />} />
                   <Route path="settings" element={<DashboardSettings />} />
+                  <Route path="sales" element={<Sales />} />
                 </Route>
               </Routes>
             </Router>

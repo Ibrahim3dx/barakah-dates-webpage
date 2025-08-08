@@ -116,9 +116,24 @@ Route::middleware('auth:sanctum')->group(function () {
                 fputcsv($handle, [
                     'order_id','date','customer_name','customer_email','customer_phone','total_amount','payment_status','order_status','is_wholesale','product_name','quantity','unit_price','line_total'
                 ]);
-                Order::with(['items.product'])
-                    ->orderByDesc('id')
-                    ->chunk(100, function ($orders) use ($handle) {
+
+                $query = Order::with(['items.product'])->orderByDesc('id');
+
+                // Apply status filter (completed only if specified)
+                if (request()->has('status') && request()->status) {
+                    $query->where('order_status', request()->status);
+                }
+
+                // Apply date filters
+                if (request()->has('from') && request()->from) {
+                    $query->whereDate('created_at', '>=', request()->from);
+                }
+
+                if (request()->has('to') && request()->to) {
+                    $query->whereDate('created_at', '<=', request()->to);
+                }
+
+                $query->chunk(100, function ($orders) use ($handle) {
                         foreach ($orders as $order) {
                             foreach ($order->items as $item) {
                                 fputcsv($handle, [

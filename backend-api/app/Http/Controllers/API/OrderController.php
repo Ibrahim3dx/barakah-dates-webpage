@@ -49,6 +49,15 @@ class OrderController extends Controller
             $query->where('order_status', $request->status);
         }
 
+        // Apply date filters if provided
+        if ($request->has('from') && $request->from) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->has('to') && $request->to) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
         // Order by created_at in descending order (latest first)
         $query->orderBy('created_at', 'desc');
 

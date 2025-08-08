@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, Search, CheckSquare, Square, MoreVertical } from 'lucide-react';
+// Add icons for import/export
+import { Upload, Download } from 'lucide-react';
 import ProductForm from '@/components/dashboard/ProductForm';
 import api from '@/lib/api';
 import { Product, ProductsResponse } from '@/types/dashboard';
@@ -19,9 +21,11 @@ const Products = () => {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showBatchActions, setShowBatchActions] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const queryClient = useQueryClient();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: products, isLoading } = useQuery<ProductsResponse>({
     queryKey: ['products', searchQuery],
@@ -174,6 +178,56 @@ const Products = () => {
     batchDeleteMutation.mutate();
   };
 
+  const handleDownloadSample = async() => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products/import/sample`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download sample');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'sample_products.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download sample file');
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post('/api/products/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch (err) {
+      console.error('Import failed', err);
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -184,9 +238,34 @@ const Products = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <h1 className="text-2xl font-semibold text-gray-900">{t('dashboard.products.title')}</h1>
+          {/* Import / Sample buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDownloadSample}
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium bg-white text-gray-700 hover:bg-gray-50"
+            >
+              <Download className="h-4 w-4 mr-1" /> {t('dashboard.products.download_sample') || 'Sample CSV'}
+            </button>
+            <button
+              type="button"
+              onClick={handleImportClick}
+              disabled={isImporting}
+              className="inline-flex items-center px-3 py-1.5 border border-indigo-300 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+            >
+              <Upload className="h-4 w-4 mr-1" /> {isImporting ? (t('dashboard.products.importing') || 'Importing...') : (t('dashboard.products.import_csv') || 'Import CSV')}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportChange}
+            />
+          </div>
           {selectedProducts.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">

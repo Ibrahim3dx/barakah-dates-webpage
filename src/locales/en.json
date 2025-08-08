@@ -10,7 +10,8 @@
     "orders": "Orders",
     "users": "Users",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "sales": "Sales"
   },
   "home": {
     "hero": {
@@ -362,7 +363,9 @@
       "batch_outofstock": "Out of Stock",
       "batch_delete_confirmation": "Delete Products",
       "batch_delete_message": "Are you sure you want to delete",
-      "batch_delete_products": "products"
+      "batch_delete_products": "products",
+      "download_sample": "Download Sample",
+      "import_csv": "Import CSV"
     },
     "categories": {
       "title": "Category Management",
@@ -405,7 +408,9 @@
       "no_orders": "No orders found",
       "paid": "Paid",
       "unpaid": "Unpaid",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "export_sales": "Export Sales",
+      "exporting": "Exporting..."
     },
     "users": {
       "title": "User Management",
@@ -432,6 +437,19 @@
       "my_account": "My Account",
       "profile": "Profile",
       "logout": "Logout"
+    },
+    "sales": {
+      "title": "Sales",
+      "subtitle": "Completed orders summary and export",
+      "from": "From",
+      "to": "To",
+      "export": "Export",
+      "exporting": "Exporting...",
+      "completed_orders": "Completed Orders",
+      "order_id": "Order ID",
+      "total_amount": "Total Amount",
+      "profit": "Profit",
+      "total": "Total"
     }
   },
   "categories": {

@@ -105,7 +105,7 @@ const OrdersView = () => {
       const response = await api.get('/api/orders/export/csv', {
         responseType: 'blob',
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -143,13 +143,13 @@ const OrdersView = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button 
+          <button
             onClick={handleExportSales}
             disabled={exporting}
             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
             <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {exporting ? (t('common.exporting') || 'Exporting...') : (t('common.export_sales') || 'Export Sales')}
+            {exporting ? (t('dashboard.orders.exporting') || t('common.exporting') || 'Exporting...') : (t('dashboard.orders.export_sales') || t('common.export_sales') || 'Export Sales')}
           </button>
           <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
             <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />

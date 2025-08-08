@@ -57,7 +57,7 @@ const ProductsView = () => {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await api.post('/api/products/import', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -91,16 +91,25 @@ const ProductsView = () => {
 
   const downloadSample = async () => {
     try {
-      const response = await api.get('/api/products/import/sample', {
-        responseType: 'blob',
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products/import/sample`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      if (!response.ok) {
+        throw new Error('Failed to download sample');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'sample_products.csv');
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download error:', error);
       alert('Failed to download sample file');
@@ -137,14 +146,14 @@ const ProductsView = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button 
+          <button
             onClick={downloadSample}
             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <Download className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t('common.download_sample') || 'Download Sample'}
           </button>
-          <button 
+          <button
             onClick={handleImport}
             disabled={importing}
             className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"

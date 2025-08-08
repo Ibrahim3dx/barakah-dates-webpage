@@ -10,7 +10,8 @@
     "orders": "الطلبات",
     "users": "المستخدمين",
     "settings": "الإعدادات",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "sales": "المبيعات"
   },
   "home": {
     "hero": {
@@ -97,7 +98,9 @@
       "shelfLife": "مدة الصلاحية",
       "harvestDate": "تاريخ الحصاد",
       "ingredients": "المكونات"
-    }
+    },
+    "download_sample": "تحميل النموذج",
+    "import_csv": "استيراد CSV"
   },
   "cart": {
     "title": "سلة التسوق",
@@ -357,7 +360,9 @@
       "batch_outofstock": "غير متوفر",
       "batch_delete_confirmation": "حذف المنتجات",
       "batch_delete_message": "هل أنت متأكد من أنك تريد حذف",
-      "batch_delete_products": "منتجات"
+      "batch_delete_products": "منتجات",
+      "download_sample": "تحميل النموذج",
+      "import_csv": "استيراد CSV"
     },
     "categories": {
       "title": "إدارة الفئات",
@@ -400,7 +405,9 @@
       "no_orders": "لم يتم العثور على طلبات",
       "paid": "مدفوع",
       "unpaid": "غير مدفوع",
-      "refunded": "مسترد"
+      "refunded": "مسترد",
+      "export_sales": "تصدير المبيعات",
+      "exporting": "جاري التصدير..."
     },
     "users": {
       "title": "إدارة المستخدمين",
@@ -446,6 +453,19 @@
       "my_account": "حسابي",
       "profile": "الملف الشخصي",
       "logout": "تسجيل الخروج"
+    },
+    "sales": {
+      "title": "المبيعات",
+      "subtitle": "ملخص الطلبات المكتملة والتصدير",
+      "from": "من",
+      "to": "إلى",
+      "export": "تصدير",
+      "exporting": "جاري التصدير...",
+      "completed_orders": "الطلبات المكتملة",
+      "order_id": "رقم الطلب",
+      "total_amount": "المبلغ الإجمالي",
+      "profit": "الربح",
+      "total": "الإجمالي"
     }
   },
   "categories": {
