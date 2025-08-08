@@ -8,6 +8,22 @@ import api from '@/lib/api';
 import { Product, ProductsResponse } from '@/types/dashboard';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+// Interface for import error response
+interface ImportError {
+  response?: {
+    data?: {
+      missing_columns?: string[];
+      found_columns?: string[];
+      required_columns?: string[];
+      help?: string;
+      message?: string;
+      summary?: {
+        errors: Array<{ error: string }>;
+      };
+    };
+  };
+}
+
 // Currency formatter for Libyan Dinar
 const formatCurrency = (amount: string | number) => {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -216,12 +232,46 @@ const Products = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      await api.post('/api/products/import', formData, {
+      const response = await api.post('/api/products/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+
       queryClient.invalidateQueries({ queryKey: ['products'] });
-    } catch (err) {
-      console.error('Import failed', err);
+
+      // Show success message with summary
+      if (response.data?.summary) {
+        const { created = 0, updated = 0 } = response.data.summary;
+        const message = `${t('dashboard.products.import_success') || 'Import completed'}: ${created} created, ${updated} updated`;
+        alert(message);
+      } else {
+        alert(t('dashboard.products.import_success') || 'Import completed successfully');
+      }
+    } catch (error: unknown) {
+      console.error('Import failed', error);
+      const errorData = (error as ImportError)?.response?.data;
+
+      if (errorData?.missing_columns) {
+        // Handle missing columns error with detailed message
+        const missingCols = errorData.missing_columns.join(', ');
+        const foundCols = errorData.found_columns?.join(', ') || 'none';
+        const requiredCols = errorData.required_columns?.join(', ') || 'unknown';
+
+        const detailedMessage = `${t('dashboard.products.import_missing_columns') || 'Missing required columns in CSV file'}\n\n` +
+          `${t('dashboard.products.import_missing') || 'Missing columns'}: ${missingCols}\n` +
+          `${t('dashboard.products.import_found') || 'Found columns'}: ${foundCols}\n` +
+          `${t('dashboard.products.import_required') || 'Required columns'}: ${requiredCols}\n\n` +
+          `${errorData.help || t('dashboard.products.import_help') || 'Please download the sample CSV file to see the correct format'}`;
+
+        alert(detailedMessage);
+      } else if (errorData?.summary?.errors) {
+        // Handle import errors with summary
+        const errorCount = errorData.summary.errors.length;
+        const firstError = errorData.summary.errors[0]?.error || 'Unknown error';
+        alert(`Import completed with ${errorCount} errors.\nFirst error: ${firstError}\n\nCheck console for full details.`);
+      } else {
+        // Generic error handling
+        alert(`${t('dashboard.products.import_error') || 'Import failed'}: ${errorData?.message || (error as Error)?.message || 'Unknown error'}`);
+      }
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

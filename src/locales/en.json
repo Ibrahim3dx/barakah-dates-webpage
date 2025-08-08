@@ -365,7 +365,14 @@
       "batch_delete_message": "Are you sure you want to delete",
       "batch_delete_products": "products",
       "download_sample": "Download Sample",
-      "import_csv": "Import CSV"
+      "import_csv": "Import CSV",
+      "import_success": "Import completed: {created} created, {updated} updated",
+      "import_error": "Import failed",
+      "import_missing_columns": "Missing required columns in CSV file",
+      "import_missing": "Missing columns",
+      "import_found": "Found columns",
+      "import_required": "Required columns",
+      "import_help": "Please download the sample CSV file to see the correct format"
     },
     "categories": {
       "title": "Category Management",

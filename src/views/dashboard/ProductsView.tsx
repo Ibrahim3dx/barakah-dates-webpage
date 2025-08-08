@@ -22,6 +22,22 @@ interface Category {
   is_active: boolean;
 }
 
+interface ImportError {
+  response?: {
+    data?: {
+      message?: string;
+      missing_columns?: string[];
+      found_columns?: string[];
+      required_columns?: string[];
+      help?: string;
+      summary?: {
+        errors: Array<{ error: string; row: number }>;
+      };
+    };
+  };
+  message?: string;
+}
+
 const ProductsView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -66,13 +82,37 @@ const ProductsView = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['products']);
-      alert(`Import completed: ${data.summary.created} created, ${data.summary.updated} updated`);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      const message = `${t('dashboard.products.import_success') || 'Import completed'}: ${data.summary.created} created, ${data.summary.updated} updated`;
+      alert(message);
       setImporting(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Import error:', error);
-      alert('Import failed: ' + (error.response?.data?.message || error.message));
+      const errorData = (error as ImportError)?.response?.data;
+
+      if (errorData?.missing_columns) {
+        // Handle missing columns error with detailed message
+        const missingCols = errorData.missing_columns.join(', ');
+        const foundCols = errorData.found_columns?.join(', ') || 'none';
+        const requiredCols = errorData.required_columns?.join(', ') || 'unknown';
+
+        const detailedMessage = `${t('dashboard.products.import_missing_columns') || 'Missing required columns in CSV file'}\n\n` +
+          `${t('dashboard.products.import_missing') || 'Missing columns'}: ${missingCols}\n` +
+          `${t('dashboard.products.import_found') || 'Found columns'}: ${foundCols}\n` +
+          `${t('dashboard.products.import_required') || 'Required columns'}: ${requiredCols}\n\n` +
+          `${errorData.help || t('dashboard.products.import_help') || 'Please download the sample CSV file to see the correct format'}`;
+
+        alert(detailedMessage);
+      } else if (errorData?.summary?.errors) {
+        // Handle import errors with summary
+        const errorCount = errorData.summary.errors.length;
+        const firstError = errorData.summary.errors[0]?.error || 'Unknown error';
+        alert(`Import completed with ${errorCount} errors.\nFirst error: ${firstError}\n\nCheck console for full details.`);
+      } else {
+        // Generic error handling
+        alert(`${t('dashboard.products.import_error') || 'Import failed'}: ${errorData?.message || (error as Error)?.message || 'Unknown error'}`);
+      }
       setImporting(false);
     },
   });

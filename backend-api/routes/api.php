@@ -75,9 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="sample_products.csv"'
             ];
-            $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active\n" .
-                      "Premium Dates,High quality dates,10.00,8.50,50,200,1\n" .
-                      "Classic Dates,Regular quality dates,7.00,5.50,100,500,1\n";
+            $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active,category_id\n" .
+                      "Premium Dates,High quality dates,10.00,8.50,50,200,1,1\n" .
+                      "Classic Dates,Regular quality dates,7.00,5.50,100,500,1,1\n";
             return response($sample, 200, $headers);
         });
     });

@@ -194,7 +194,7 @@ class ProductController extends Controller
         }
 
         $requiredHeaders = [
-            'name', 'description', 'price', 'wholesale_price', 'wholesale_threshold', 'stock', 'is_active'
+            'name', 'description', 'price', 'wholesale_price', 'wholesale_threshold', 'stock', 'is_active', 'category_id'
         ];
 
         $header = fgetcsv($handle);
@@ -203,14 +203,21 @@ class ProductController extends Controller
         }
         $normalizedHeader = array_map(fn($h) => strtolower(trim($h)), $header);
 
+        $missingHeaders = [];
         foreach ($requiredHeaders as $req) {
             if (!in_array($req, $normalizedHeader, true)) {
-                return response()->json([
-                    'message' => 'Invalid header. Missing: ' . $req,
-                    'expected' => $requiredHeaders,
-                    'got' => $normalizedHeader
-                ], 422);
+                $missingHeaders[] = $req;
             }
+        }
+
+        if (!empty($missingHeaders)) {
+            return response()->json([
+                'message' => 'Missing required columns in CSV file',
+                'missing_columns' => $missingHeaders,
+                'required_columns' => $requiredHeaders,
+                'found_columns' => $normalizedHeader,
+                'help' => 'Please download the sample CSV file to see the correct format'
+            ], 422);
         }
 
         $indexes = array_flip($normalizedHeader);
@@ -233,22 +240,36 @@ class ProductController extends Controller
                     $payload = [
                         'name' => trim($data['name'] ?? ''),
                         'description' => $data['description'] ?? null,
-                        'price' => is_numeric($data['price']) ? (float)$data['price'] : null,
+                        'retail_price' => is_numeric($data['price']) ? (float)$data['price'] : null,
                         'wholesale_price' => is_numeric($data['wholesale_price']) ? (float)$data['wholesale_price'] : null,
                         'wholesale_threshold' => is_numeric($data['wholesale_threshold']) ? (int)$data['wholesale_threshold'] : null,
                         'stock' => is_numeric($data['stock']) ? (int)$data['stock'] : 0,
-                        'is_active' => isset($data['is_active']) ? (filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? 0) : 1
+                        'is_active' => isset($data['is_active']) ? (filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? 0) : 1,
+                        'category_id' => is_numeric($data['category_id']) ? (int)$data['category_id'] : null
                     ];
 
-                    if ($payload['name'] === '' || $payload['price'] === null) {
+                    if ($payload['name'] === '' || $payload['retail_price'] === null) {
                         throw new \Exception('Missing required name or price');
+                    }
+
+                    if ($payload['category_id'] === null) {
+                        throw new \Exception('Missing or invalid category_id');
+                    }
+
+                    // Check if category exists
+                    if (!\App\Models\Category::where('id', $payload['category_id'])->exists()) {
+                        throw new \Exception('Category with ID ' . $payload['category_id'] . ' does not exist');
                     }
 
                     $product = Product::where('name', $payload['name'])->first();
                     if ($product) {
-                        $product->update($payload);
+                        // Update existing product
+                        $product->update(array_filter($payload, function($value) {
+                            return $value !== null;
+                        }));
                         $updated++;
                     } else {
+                        // Create new product
                         Product::create($payload);
                         $created++;
                     }

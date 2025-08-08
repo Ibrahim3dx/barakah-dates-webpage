@@ -362,7 +362,15 @@
       "batch_delete_message": "هل أنت متأكد من أنك تريد حذف",
       "batch_delete_products": "منتجات",
       "download_sample": "تحميل النموذج",
-      "import_csv": "استيراد CSV"
+      "import_csv": "استيراد CSV",
+      "import_success": "تم الاستيراد بنجاح",
+      "import_error": "فشل الاستيراد",
+      "import_missing_columns": "أعمدة مطلوبة مفقودة في ملف CSV",
+      "import_missing": "الأعمدة المفقودة",
+      "import_found": "الأعمدة الموجودة",
+      "import_required": "الأعمدة المطلوبة",
+      "import_help": "يرجى تحميل ملف CSV النموذجي لرؤية التنسيق الصحيح",
+      "importing": "جاري الاستيراد..."
     },
     "categories": {
       "title": "إدارة الفئات",
