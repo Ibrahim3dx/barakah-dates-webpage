@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
 
-## Project info
+# Barakah Dates Webpage
 
-**URL**: https://lovable.dev/projects/ba7c1598-a438-458f-a49f-a02f40b8b822
+This repository contains both the **frontend** (React, Vite, TypeScript) and the **backend API** (Laravel) for the Barakah Dates web application.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Project Structure
 
-**Use Lovable**
+- `frontend/` — React + Vite + TypeScript app
+- `backend-api/` — Laravel REST API
+- `public/` — Static assets for frontend
+- `.env` — Frontend environment config
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ba7c1598-a438-458f-a49f-a02f40b8b822) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Frontend Setup
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js & npm ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+### Getting Started
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
+cd barakah-dates-webpage/frontend
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
+Edit `.env` in the root directory:
+```
+VITE_BACKEND_URL=https://api.albarakadates.com
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Backend Setup (Laravel API)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+See [`backend-api/DEPLOYMENT_GUIDE.md`](backend-api/DEPLOYMENT_GUIDE.md) for full deployment instructions (including cPanel).
 
-## What technologies are used for this project?
+### Local Development
+```sh
+cd backend-api
+composer install
+cp .env.example .env # or create your own .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+```
 
-This project is built with:
+---
 
+## Technologies Used
+
+**Frontend:**
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+**Backend:**
+- Laravel
+- MySQL
 
-Simply open [Lovable](https://lovable.dev/projects/ba7c1598-a438-458f-a49f-a02f40b8b822) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
+### Frontend
+- Deploy using Vercel, Netlify, or any static hosting provider
+- Or use Lovable: [Lovable Project](https://lovable.dev/projects/ba7c1598-a438-458f-a49f-a02f40b8b822)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Backend
+- See [`backend-api/DEPLOYMENT_GUIDE.md`](backend-api/DEPLOYMENT_GUIDE.md)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
