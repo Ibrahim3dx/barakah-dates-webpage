@@ -41,3 +41,38 @@ jobs:
         username: ${{ secrets.BARKA_FTP_USERNAME }}
         password: ${{ secrets.BARKA_FTP_PASSWORD }}
         local-dir: dist/
+  api-deploy:
+    name: 🎉 Deploy backend
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@main
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    # - name: Copy .env.prod.example to .env
+    #   run: cp .env.prod.example .env
+
+    - name: List output files
+      run: find backend-api/ -print
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.BARKA_API_SERVER }}
+        username: ${{ secrets.BARKA_API_FTP_USERNAME }}
+        password: ${{ secrets.BARKA_API_FTP_PASSWORD }}
+        local-dir: backend-api/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          .env
