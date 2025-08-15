@@ -67,7 +67,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.BARKA_API_SERVER }}
+        server: ${{ secrets.BARKA_FTP_API_SERVER }}
         username: ${{ secrets.BARKA_API_FTP_USERNAME }}
         password: ${{ secrets.BARKA_API_FTP_PASSWORD }}
         local-dir: backend-api/
