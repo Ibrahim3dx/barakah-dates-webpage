@@ -377,6 +377,7 @@
       "add_category": "إضافة فئة",
       "edit_category": "تعديل الفئة",
       "search_placeholder": "البحث في الفئات...",
+      "id": "المعرف",
       "name": "اسم الفئة",
       "description": "الوصف",
       "products_count": "عدد المنتجات",

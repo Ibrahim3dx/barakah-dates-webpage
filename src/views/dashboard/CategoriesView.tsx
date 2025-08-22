@@ -228,6 +228,10 @@ const CategoriesView = () => {
                 </span>
               </div>
 
+              <div className="text-xs text-gray-500 mb-2">
+                ID: #{category.id}
+              </div>
+
               {category.description && (
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                   {category.description}
@@ -287,6 +291,9 @@ const CategoriesView = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.id') || 'ID'}
+                </th>
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                   {t('dashboard.categories.name') || 'Name'}
                 </th>
                 <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
@@ -306,6 +313,11 @@ const CategoriesView = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {categories?.data?.map((category: Category) => (
                 <tr key={category.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      #{category.id}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">

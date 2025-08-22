@@ -112,6 +112,9 @@ const Categories = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                  {t('dashboard.categories.id') || 'ID'}
+                </th>
+                <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                   {t('dashboard.categories.name')}
                 </th>
                 <th className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
@@ -128,6 +131,11 @@ const Categories = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {categories?.data?.map((category: Category) => (
                 <tr key={category.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      #{category.id}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">

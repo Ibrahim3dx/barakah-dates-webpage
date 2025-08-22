@@ -379,6 +379,7 @@
       "add_category": "Add Category",
       "edit_category": "Edit Category",
       "search_placeholder": "Search categories...",
+      "id": "ID",
       "name": "Category Name",
       "description": "Description",
       "products_count": "Product Count",
