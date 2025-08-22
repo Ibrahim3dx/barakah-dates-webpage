@@ -106,12 +106,7 @@ const Quality = () => {
             </div>
           </div>
         </div>
-        
-        <div className="text-center mt-12">
-          <Button size="lg" className="font-arabic text-lg bg-dates-amber hover:bg-dates-gold">
-            اكتشف عملية الإنتاج
-          </Button>
-        </div>
+          
       </div>
     </section>
   );
