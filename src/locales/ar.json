@@ -526,7 +526,8 @@
     "showing": "عرض",
     "to": "إلى",
     "of": "من",
-    "results": "نتيجة"
+    "results": "نتيجة",
+    "items_per_page": "عدد العناصر في الصفحة"
   },
   "settings": {
     "title": "الإعدادات",

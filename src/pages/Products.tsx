@@ -52,11 +52,14 @@ interface ApiResponse {
   current_page: number;
   last_page: number;
   total: number;
+  per_page: number;
 }
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
   const { addToCart } = useCart();
   const { t } = useLanguage();
 
@@ -71,16 +74,28 @@ const Products = () => {
   });
 
   const { data: response, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: ['products', searchQuery, selectedCategory],
+    queryKey: ['products', searchQuery, selectedCategory, currentPage, pageSize],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (selectedCategory) params.append('category_id', selectedCategory.toString());
+      params.append('page', currentPage.toString());
+      params.append('per_page', pageSize.toString());
 
       const response = await api.get(`/api/products?${params.toString()}`);
       return response.data;
     },
   });
+
+  const handleCategoryChange = (categoryId: number | null) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1); // Reset to first page when changing category
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
   const handleAddToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -152,13 +167,13 @@ const Products = () => {
                 type="text"
                 placeholder={t('products.search')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10 border-orange-200 focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
             <select
               value={selectedCategory || ''}
-              onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
+              onChange={(e) => handleCategoryChange(e.target.value ? Number(e.target.value) : null)}
               className="border border-orange-200 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
             >
               <option value="">{t('products.allCategories')}</option>
@@ -168,6 +183,26 @@ const Products = () => {
                 </option>
               ))}
             </select>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-700">
+                {t('common.items_per_page') || 'Items per page:'}
+              </label>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="border border-orange-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-sm"
+              >
+                <option value={12}>12</option>
+                <option value={24}>24</option>
+                <option value={36}>36</option>
+                <option value={48}>48</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -265,6 +300,56 @@ const Products = () => {
           </div>
         ))}
         </div>
+
+        {/* Pagination */}
+        {response && response.last_page > 1 && (
+          <div className="mt-8 flex items-center justify-center">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.previous') || 'Previous'}
+              </button>
+
+              <div className="flex items-center space-x-2">
+                {Array.from({ length: Math.min(5, response.last_page) }, (_, i) => {
+                  const startPage = Math.max(1, Math.min(response.last_page - 4, currentPage - 2));
+                  const pageNumber = startPage + i;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`px-3 py-2 rounded-md text-sm font-medium ${
+                        currentPage === pageNumber
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(Math.min(response.last_page, currentPage + 1))}
+                disabled={currentPage >= response.last_page}
+                className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.next') || 'Next'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Results Info */}
+        {response && response.total > 0 && (
+          <div className="mt-4 text-center text-sm text-gray-600">
+            {t('common.showing') || 'Showing'} {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, response.total)} {t('common.of') || 'of'} {response.total} {t('common.results') || 'results'}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -32,6 +32,8 @@ const formatCurrency = (amount: string | number) => {
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -44,9 +46,14 @@ const Products = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: products, isLoading } = useQuery<ProductsResponse>({
-    queryKey: ['products', searchQuery],
+    queryKey: ['products', searchQuery, currentPage, pageSize],
     queryFn: async () => {
-      const response = await api.get(`/api/products?search=${searchQuery}`);
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      params.append('page', currentPage.toString());
+      params.append('per_page', pageSize.toString());
+
+      const response = await api.get(`/api/products?${params.toString()}`);
       return response.data;
     },
   });
@@ -370,19 +377,41 @@ const Products = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="max-w-lg w-full">
-        <div className="relative">
-          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-            <Search className="h-5 w-5 text-gray-400" />
+      {/* Search Bar and Page Size Selector */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div className="max-w-lg w-full">
+          <div className="relative">
+            <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className={`block w-full ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+              placeholder={t('dashboard.products.search_placeholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className={`block w-full ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
-            placeholder={t('dashboard.products.search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        </div>
+
+        {/* Page Size Selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-700">
+            {t('common.items_per_page') || 'Items per page:'}
+          </label>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1); // Reset to first page when changing page size
+            }}
+            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
         </div>
       </div>
 
@@ -511,6 +540,83 @@ const Products = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {products && products.last_page > 1 && (
+          <div className="bg-white px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+            <div className="flex-1 flex justify-between sm:hidden">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.previous') || 'Previous'}
+              </button>
+              <button
+                onClick={() => setCurrentPage(Math.min(products.last_page, currentPage + 1))}
+                disabled={currentPage >= products.last_page}
+                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t('common.next') || 'Next'}
+              </button>
+            </div>
+
+            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  {t('common.showing') || 'Showing'}{' '}
+                  <span className="font-medium">{((currentPage - 1) * pageSize) + 1}</span>
+                  {' '}{t('common.to') || 'to'}{' '}
+                  <span className="font-medium">
+                    {Math.min(currentPage * pageSize, products.total)}
+                  </span>
+                  {' '}{t('common.of') || 'of'}{' '}
+                  <span className="font-medium">{products.total}</span>
+                  {' '}{t('common.results') || 'results'}
+                </p>
+              </div>
+
+              <div>
+                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage <= 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('common.previous') || 'Previous'}
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, products.last_page) }, (_, i) => {
+                    const startPage = Math.max(1, Math.min(products.last_page - 4, currentPage - 2));
+                    const pageNumber = startPage + i;
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          currentPage === pageNumber
+                            ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setCurrentPage(Math.min(products.last_page, currentPage + 1))}
+                    disabled={currentPage >= products.last_page}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('common.next') || 'Next'}
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Product Form Modal */}

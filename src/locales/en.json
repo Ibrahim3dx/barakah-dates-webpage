@@ -509,7 +509,8 @@
     "showing": "Showing",
     "to": "to",
     "of": "of",
-    "results": "results"
+    "results": "results",
+    "items_per_page": "Items per page"
   },
   "settings": {
     "title": "Settings",

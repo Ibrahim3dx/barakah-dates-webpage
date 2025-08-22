@@ -34,7 +34,11 @@ class ProductController extends Controller
             $query->where('category_id', $request->get('category_id'));
         }
 
-        $products = $query->latest()->paginate(10);
+        // Get per_page from request, default to 10, max 100
+        $perPage = $request->get('per_page', 10);
+        $perPage = min(max($perPage, 1), 100); // Ensure it's between 1 and 100
+
+        $products = $query->latest()->paginate($perPage);
 
         return response()->json($products);
     }
