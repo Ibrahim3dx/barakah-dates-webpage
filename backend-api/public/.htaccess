@@ -26,10 +26,13 @@
 
 # Security Headers
 <IfModule mod_headers.c>
-    Header always set Access-Control-Allow-Origin "*"
+    # Add specific CORS headers
+    SetEnvIf Origin "^https?://(www\.)?(albarakadates\.com|localhost:8081)$" CORS_ALLOW_ORIGIN=$0
+    Header always set Access-Control-Allow-Origin "%{CORS_ALLOW_ORIGIN}e" env=CORS_ALLOW_ORIGIN
+    Header always set Access-Control-Allow-Origin "*" "expr=-z %{req:CORS_ALLOW_ORIGIN}"
+
     Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-TOKEN, X-XSRF-TOKEN, X-Socket-ID, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-    Header always set Access-Control-Expose-Headers "*"
     Header always set Access-Control-Max-Age "3600"
 
     RewriteCond %{REQUEST_METHOD} OPTIONS

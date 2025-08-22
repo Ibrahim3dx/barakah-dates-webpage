@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import api from '@/lib/api';
 
 // Currency formatter for Libyan Dinar
 const formatCurrency = (amount: string | number) => {
@@ -61,11 +62,8 @@ const Products = () => {
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-      const data = await response.json();
+      const response = await api.get('/api/categories');
+      const data = response.data;
       // Return the data array from the paginated response
       return data.data || [];
     },
@@ -78,12 +76,8 @@ const Products = () => {
       if (searchQuery) params.append('search', searchQuery);
       if (selectedCategory) params.append('category_id', selectedCategory.toString());
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-      const data = await response.json();
-      return data;
+      const response = await api.get(`/api/products?${params.toString()}`);
+      return response.data;
     },
   });
 
