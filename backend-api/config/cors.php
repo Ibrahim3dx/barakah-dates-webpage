@@ -3,7 +3,7 @@
 return [
     'paths' => ['*', 'api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    'allowed_origins' => ['http://localhost:8081'],
+    'allowed_origins' => ['*'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => [
         'X-Requested-With',
@@ -19,5 +19,5 @@ return [
     ],
     'exposed_headers' => ['*'],
     'max_age' => 3600,
-    'supports_credentials' => true,
-]; 
+    'supports_credentials' => false,
+];
