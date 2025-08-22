@@ -43,6 +43,18 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 // Public order creation (for guests)
 Route::post('/orders', [OrderController::class, 'store']);
 
+// Public sample CSV download
+Route::get('/products/import/sample', function () {
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="sample_products.csv"'
+    ];
+    $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active,category_id\n" .
+              "Premium Dates,High quality dates,10.00,8.50,50,200,1,1\n" .
+              "Classic Dates,Regular quality dates,7.00,5.50,100,500,1,1\n";
+    return response($sample, 200, $headers);
+});
+
 // Payment callback routes (no auth required)
 Route::post('/payments/massarat/callback', [PaymentController::class, 'handleMassarATCallback'])
     ->name('api.payments.massarat.callback');
@@ -70,16 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:create-products')->group(function () {
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/import', [ProductController::class, 'import']);
-        Route::get('/products/import/sample', function () {
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="sample_products.csv"'
-            ];
-            $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active,category_id\n" .
-                      "Premium Dates,High quality dates,10.00,8.50,50,200,1,1\n" .
-                      "Classic Dates,Regular quality dates,7.00,5.50,100,500,1,1\n";
-            return response($sample, 200, $headers);
-        });
     });
 
     Route::middleware('permission:edit-products')->group(function () {
