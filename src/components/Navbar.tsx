@@ -41,7 +41,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center">
               <img
                 src={`${import.meta.env.VITE_BACKEND_URL}/logo.png`}
-                alt="Barakah Dates"
+                alt="بركة التمور"
                 className="h-10 w-auto"
               />
             </Link>
@@ -68,15 +68,15 @@ const Navbar = () => {
                   )}
                 </Link>
 
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   onClick={toggleLanguage}
                   className="flex items-center gap-2"
                 >
                   <Globe className="h-4 w-4" />
-                  <span className="text-sm">{language === 'ar' ? 'EN' : 'عربي'}</span>
-                </Button>
+                  <span className="text-sm">عربي</span>
+                </Button> */}
 
                 {user ? (
                   <div className="flex items-center gap-4">
@@ -175,14 +175,14 @@ const Navbar = () => {
                       </Link>
                     )}
 
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       onClick={toggleLanguage}
                       className={`flex items-center gap-2 w-full ${language === 'ar' ? 'justify-end' : 'justify-start'}`}
                     >
                       <Globe className="h-4 w-4" />
-                      <span className="text-sm">{language === 'ar' ? 'EN' : 'عربي'}</span>
-                    </Button>
+                      <span className="text-sm">عربي</span>
+                    </Button> */}
 
                     <div className="border-t pt-4 w-full">
                       {user ? (
