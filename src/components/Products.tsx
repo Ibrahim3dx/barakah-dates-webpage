@@ -144,6 +144,10 @@ const Products = () => {
                   src={product.image_url}
                   alt={product.name}
                   className="w-full h-56 object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/fallback-product-image.png';
+                  }}
                 />
                 {product.category && (
                   <span className="absolute top-3 right-3 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">

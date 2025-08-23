@@ -372,8 +372,12 @@ const ProductsView = () => {
                       <div className="h-12 w-12 flex-shrink-0">
                         <img
                           className="h-12 w-12 rounded-lg object-cover"
-                          src={product.image_url || '/placeholder.svg'}
+                          src={product.image_url || '/fallback-product-image.png'}
                           alt={product.name}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/fallback-product-image.png';
+                          }}
                         />
                       </div>
                       <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>

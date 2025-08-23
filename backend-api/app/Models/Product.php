@@ -91,10 +91,11 @@ class Product extends Model
     }
 
     // Accessor for image_url - returns full URL to the image
-    public function getImageUrlAttribute(): ?string
+    public function getImageUrlAttribute(): string
     {
         if (!$this->image) {
-            return null;
+            // Return fallback image when no image is set
+            return url('fallback-product-image.png');
         }
 
         // If it's already a full URL (like seeded data), return as is

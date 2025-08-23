@@ -479,6 +479,10 @@ const Products = () => {
                           className="h-10 w-10 rounded-full object-cover"
                           src={product.image_url}
                           alt={product.name}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/fallback-product-image.png';
+                          }}
                         />
                       </div>
                       <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>

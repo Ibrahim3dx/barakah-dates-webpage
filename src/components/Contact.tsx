@@ -2,8 +2,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { useState } from "react";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Generate mailto URL with form data
+    const subject = encodeURIComponent(`رسالة من ${formData.name} - البركة للتمور`);
+    const body = encodeURIComponent(
+      `الاسم: ${formData.name}\n` +
+      `البريد الإلكتروني: ${formData.email}\n` +
+      `رقم الهاتف: ${formData.phone}\n\n` +
+      `الرسالة:\n${formData.message}\n\n` +
+      `---\n` +
+      `تم إرسال هذه الرسالة من نموذج التواصل في موقع البركة للتمور`
+    );
+    const mailtoUrl = `mailto:info@albarakadates.com?subject=${subject}&body=${body}`;
+
+    // Open default mail app
+    window.location.href = mailtoUrl;
+  };
   return (
     <section id="contact" className="section-padding bg-secondary">
       <div className="container mx-auto container-padding">
@@ -20,16 +54,20 @@ const Contact = () => {
           <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
             <h3 className="font-arabic text-2xl font-bold mb-6 text-right">ارسل رسالة</h3>
 
-            <form className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="name" className="font-arabic block text-sm font-medium text-right mb-1">
                   الاسم الكامل
                 </label>
                 <Input
                   id="name"
+                  name="name"
                   type="text"
                   placeholder="أدخل اسمك الكامل"
                   className="font-arabic text-right"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
 
@@ -39,9 +77,13 @@ const Contact = () => {
                 </label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="أدخل بريدك الإلكتروني"
                   className="font-arabic text-right"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
 
@@ -51,9 +93,12 @@ const Contact = () => {
                 </label>
                 <Input
                   id="phone"
+                  name="phone"
                   type="tel"
                   placeholder="أدخل رقم الهاتف"
                   className="font-arabic text-right"
+                  value={formData.phone}
+                  onChange={handleInputChange}
                 />
               </div>
 
@@ -63,8 +108,12 @@ const Contact = () => {
                 </label>
                 <Textarea
                   id="message"
+                  name="message"
                   placeholder="اكتب رسالتك هنا..."
                   className="font-arabic text-right min-h-[120px]"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
 

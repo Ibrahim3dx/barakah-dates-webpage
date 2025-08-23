@@ -50,6 +50,10 @@ const Cart = () => {
                     src={item.image_url}
                     alt={item.name}
                     className="w-24 h-24 object-cover rounded-md"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/fallback-product-image.png';
+                    }}
                   />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">{item.name}</h3>

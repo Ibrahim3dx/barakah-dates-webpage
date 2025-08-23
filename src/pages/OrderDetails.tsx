@@ -167,6 +167,10 @@ const OrderDetails = () => {
                       src={item.product.image_url}
                       alt={item.product.name}
                       className="w-20 h-20 object-cover rounded-lg flex-shrink-0 mx-auto sm:mx-0"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/fallback-product-image.png';
+                      }}
                     />
                     <div className="flex-1 min-w-0 text-center sm:text-start">
                       <h3 className="font-semibold text-gray-900 text-lg mb-2 leading-tight">{item.product.name}</h3>
