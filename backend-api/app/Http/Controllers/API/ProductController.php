@@ -198,7 +198,7 @@ class ProductController extends Controller
         }
 
         $requiredHeaders = [
-            'name', 'description', 'price', 'wholesale_price', 'wholesale_threshold', 'stock', 'is_active', 'category_id'
+            'name', 'description', 'cost', 'price', 'wholesale_price', 'wholesale_threshold', 'stock', 'is_active', 'category_id'
         ];
 
         $header = fgetcsv($handle);
@@ -246,6 +246,8 @@ class ProductController extends Controller
                         'description' => $data['description'] ?? null,
                         'retail_price' => is_numeric($data['price']) ? (float)$data['price'] : null,
                         'wholesale_price' => is_numeric($data['wholesale_price']) ? (float)$data['wholesale_price'] : null,
+                        'retail_buying_price' => is_numeric($data['cost']) ? (float)$data['cost'] : null,
+                        'wholesale_buying_price' => is_numeric($data['cost']) ? (float)$data['cost'] : null,
                         'wholesale_threshold' => is_numeric($data['wholesale_threshold']) ? (int)$data['wholesale_threshold'] : null,
                         'stock' => is_numeric($data['stock']) ? (int)$data['stock'] : 0,
                         'is_active' => isset($data['is_active']) ? (filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? 0) : 1,
