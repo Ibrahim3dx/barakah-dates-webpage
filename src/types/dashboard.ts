@@ -51,3 +51,20 @@ export interface ProductsResponse {
   per_page: number;
   last_page: number;
 }
+
+export interface City {
+  id: number;
+  name: string;
+  delivery_price: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CitiesResponse {
+  data: City[];
+  total: number;
+  current_page: number;
+  per_page: number;
+  last_page: number;
+}

@@ -10,7 +10,8 @@ import {
   X,
   LogOut,
   User,
-  Folder
+  Folder,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const DashboardLayout = () => {
     { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('nav.products'), href: '/dashboard/products', icon: Package },
     { name: t('nav.categories'), href: '/dashboard/categories', icon: Folder },
+    { name: t('nav.cities'), href: '/dashboard/cities', icon: MapPin },
     { name: t('nav.orders'), href: '/dashboard/orders', icon: ShoppingCart },
     { name: t('nav.sales'), href: '/dashboard/sales', icon: ShoppingCart },
     { name: t('nav.users'), href: '/dashboard/users', icon: Users },

@@ -20,6 +20,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import DashboardProducts from './pages/dashboard/Products';
 import DashboardCategories from './pages/dashboard/Categories';
+import DashboardCities from './pages/dashboard/Cities';
 import DashboardOrders from './pages/dashboard/Orders';
 import DashboardUsers from './pages/dashboard/Users';
 import DashboardSettings from './pages/dashboard/Settings';
@@ -78,6 +79,7 @@ function App() {
                   <Route index element={<Dashboard />} />
                   <Route path="products" element={<DashboardProducts />} />
                   <Route path="categories" element={<DashboardCategories />} />
+                  <Route path="cities" element={<DashboardCities />} />
                   <Route path="orders" element={<DashboardOrders />} />
                   <Route path="users" element={<DashboardUsers />} />
                   <Route path="settings" element={<DashboardSettings />} />

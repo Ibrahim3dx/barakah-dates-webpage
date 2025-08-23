@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\CityController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\SettingController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Models\Order;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +26,6 @@ use App\Http\Controllers\Auth\RegisterController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-use App\Models\Order;
 
 // Public routes
 Route::post('/auth/login', [LoginController::class, 'login'])->name('login');
@@ -40,6 +41,9 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
+// Public city routes
+Route::get('/cities', [CityController::class, 'index']);
+
 // Public order creation (for guests)
 Route::post('/orders', [OrderController::class, 'store']);
 
@@ -52,6 +56,18 @@ Route::get('/products/import/sample', function () {
     $sample = "name,description,price,wholesale_price,wholesale_threshold,stock,is_active,category_id\n" .
               "Premium Dates,High quality dates,10.00,8.50,50,200,1,1\n" .
               "Classic Dates,Regular quality dates,7.00,5.50,100,500,1,1\n";
+    return response($sample, 200, $headers);
+});
+
+Route::get('/cities/import/sample', function () {
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="sample_cities.csv"'
+    ];
+    $sample = "name,delivery_price,is_active\n" .
+              "Tripoli,5.00,true\n" .
+              "Benghazi,7.50,true\n" .
+              "Misrata,6.00,true\n";
     return response($sample, 200, $headers);
 });
 
@@ -197,6 +213,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
     });
 
+    // City management routes
+    Route::middleware('permission:create-products')->group(function () {
+        Route::post('/cities', [CityController::class, 'store']);
+        Route::post('/cities/import', [CityController::class, 'import']);
+    });
+
+    Route::middleware('permission:edit-products')->group(function () {
+        Route::put('/cities/{city}', [CityController::class, 'update']);
+        Route::patch('/cities/{city}/status', [CityController::class, 'updateStatus']);
+    });
+
+    Route::middleware('permission:delete-products')->group(function () {
+        Route::delete('/cities/{city}', [CityController::class, 'destroy']);
+    });
+
     // Settings routes
     Route::middleware('permission:manage-settings')->group(function () {
         Route::get('/settings', [SettingController::class, 'index']);
@@ -217,9 +248,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{order}/payments/verify', [PaymentController::class, 'verifyPayment'])
         ->name('api.payments.verify');
 });
-
-// Payment callback routes (no auth required)
-Route::post('/payments/massarat/callback', [PaymentController::class, 'handleMassarATCallback'])
-    ->name('api.payments.massarat.callback');
-Route::post('/payments/paypal/callback', [PaymentController::class, 'handlePayPalCallback'])
-    ->name('api.payments.paypal.callback');
