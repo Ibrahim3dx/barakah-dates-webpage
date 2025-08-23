@@ -71,24 +71,6 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="font-arabic text-xl font-bold mb-4 text-right">النشرة البريدية</h3>
-            <p className="font-arabic text-sm text-white/80 mb-4 text-right">
-              اشترك في نشرتنا البريدية للحصول على آخر الأخبار والعروض الحصرية
-            </p>
-            <div className="flex flex-col space-y-2">
-              <Input
-                type="email"
-                placeholder="البريد الإلكتروني"
-                className="font-arabic text-right bg-white/10 border-white/20 placeholder-white/50 text-white"
-              />
-              <Button className="font-arabic bg-dates-amber hover:bg-dates-gold text-white w-full">
-                اشتراك
-              </Button>
-            </div>
-          </div>
         </div>
 
         <hr className="border-white/20 my-8" />
