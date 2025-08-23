@@ -62,7 +62,9 @@ const DashboardLayout = () => {
         }`}
       >
         <div className="h-16 flex items-center justify-center border-b">
-          <h1 className="text-xl font-bold text-gray-800">تمور البركة</h1>
+          <Link to="/" className="text-xl font-bold text-gray-800 hover:text-gray-600 transition-colors">
+            تمور البركة
+          </Link>
         </div>
         <nav className="mt-5 px-2">
           {navigation.map((item) => {
