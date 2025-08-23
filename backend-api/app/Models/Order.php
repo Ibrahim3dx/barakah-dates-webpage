@@ -18,6 +18,7 @@ class Order extends Model
         'customer_phone',
         'shipping_address',
         'total_amount',
+        'delivery_price',
         'payment_method',
         'payment_status',
         'order_status',
@@ -27,6 +28,7 @@ class Order extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'delivery_price' => 'decimal:2',
         'is_wholesale' => 'boolean',
         'payment_status' => 'string',
         'order_status' => 'string'

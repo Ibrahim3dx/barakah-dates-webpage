@@ -144,9 +144,10 @@
       "phone": "Phone",
       "address": "Address",
       "city": "City",
+      "selectCity": "Select City",
       "state": "State",
-      "zipCode": "ZIP Code",
-      "country": "Country",
+      "whatsappNumber": "WhatsApp Number",
+      "whatsappPlaceholder": "Auto-filled from phone number",
       "paymentMethod": "Payment Method",
       "submit": "Proceed to Payment"
     },
@@ -157,6 +158,8 @@
     },
     "summary": {
       "title": "Order Summary",
+      "subtotal": "Subtotal",
+      "delivery": "Delivery",
       "total": "Total"
     },
     "success": "Order placed successfully",

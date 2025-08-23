@@ -161,9 +161,10 @@
       "phone": "رقم الهاتف",
       "address": "العنوان",
       "city": "المدينة",
+      "selectCity": "اختر المدينة",
       "state": "المنطقة",
-      "zipCode": "الرمز البريدي",
-      "country": "الدولة",
+      "whatsappNumber": "رقم الواتساب",
+      "whatsappPlaceholder": "سيتم ملؤه تلقائياً من رقم الهاتف",
       "paymentMethod": "طريقة الدفع",
       "submit": "المتابعة للدفع"
     },
@@ -174,6 +175,8 @@
     },
     "summary": {
       "title": "ملخص الطلب",
+      "subtotal": "المجموع الفرعي",
+      "delivery": "التوصيل",
       "total": "المجموع"
     },
     "success": "تم تقديم الطلب بنجاح",

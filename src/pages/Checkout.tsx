@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '../components/ui/button';
@@ -9,11 +9,18 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
+import { City } from '../types/dashboard';
 
 // Currency formatter for Libyan Dinar
-const formatCurrency = (amount: number) => {
-  return `${amount.toFixed(2)} د.ل`;
+const formatCurrency = (amount: number | string) => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  // Handle NaN or invalid numbers
+  if (isNaN(numAmount) || numAmount === null || numAmount === undefined) {
+    return '0.00 د.ل';
+  }
+  return `${numAmount.toFixed(2)} د.ل`;
 };
 
 const checkoutSchema = z.object({
@@ -24,8 +31,7 @@ const checkoutSchema = z.object({
   address: z.string().min(1, 'Address is required'),
   city: z.string().min(1, 'City is required'),
   state: z.string().min(1, 'State is required'),
-  zipCode: z.string().min(1, 'ZIP code is required'),
-  country: z.string().min(1, 'Country is required'),
+  whatsappNumber: z.string().min(1, 'WhatsApp number is required'),
   paymentMethod: z.enum(['cash', 'massarat', 'paypal']).default('cash'),
 });
 
@@ -33,20 +39,59 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, getItemPrice } = useCart();
   const { t } = useLanguage();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [autofillData, setAutofillData] = useState<Partial<CheckoutFormData> | null>(null);
+  const [selectedCityId, setSelectedCityId] = useState<string>('');
+  const [deliveryPrice, setDeliveryPrice] = useState<number>(0);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
+    setValue,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
   });
+
+  // Watch phone field to auto-fill whatsapp number
+  const phoneValue = watch('phone');
+
+  // Fetch cities for dropdown
+  const { data: cities = [] } = useQuery<City[]>({
+    queryKey: ['cities-public'],
+    queryFn: async () => {
+      const response = await api.get('/api/cities');
+      return response.data.data || response.data;
+    },
+  });
+
+  // Auto-fill whatsapp number when phone changes
+  useEffect(() => {
+    if (phoneValue) {
+      setValue('whatsappNumber', phoneValue);
+    }
+  }, [phoneValue, setValue]);
+
+  // Update delivery price when city selection changes
+  useEffect(() => {
+    if (selectedCityId && cities.length > 0) {
+      const selectedCity = cities.find(city => city.id.toString() === selectedCityId);
+      if (selectedCity) {
+        setDeliveryPrice(Number(selectedCity.delivery_price) || 0);
+        setValue('city', selectedCity.name);
+      }
+    } else {
+      setDeliveryPrice(0);
+    }
+  }, [selectedCityId, cities, setValue]);
+
+  // Calculate total with delivery
+  const totalWithDelivery = Number(totalAmount) + Number(deliveryPrice);
 
   // Fetch user profile data for auto-fill
   useEffect(() => {
@@ -79,9 +124,10 @@ const Checkout = () => {
         customer_name: `${data.firstName} ${data.lastName}`,
         customer_email: data.email,
         customer_phone: data.phone,
-        shipping_address: `${data.address}, ${data.city}, ${data.state} ${data.zipCode}, ${data.country}`,
+        shipping_address: `${data.address}, ${data.city}, ${data.state}`,
         payment_method: data.paymentMethod,
-        notes: '',
+        notes: `WhatsApp: ${data.whatsappNumber}`,
+        delivery_price: deliveryPrice,
         items: items.map(item => ({
           product_id: item.id,
           quantity: item.quantity
@@ -223,9 +269,31 @@ const Checkout = () => {
                 <label className="block text-sm font-medium mb-2">
                   {t('checkout.form.city')}
                 </label>
-                <Input
+                <select
+                  value={selectedCityId}
+                  onChange={(e) => {
+                    setSelectedCityId(e.target.value);
+                    // Find the selected city and update the hidden city field
+                    const selectedCity = cities.find(city => city.id.toString() === e.target.value);
+                    if (selectedCity) {
+                      setValue('city', selectedCity.name);
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.city ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">{t('checkout.form.selectCity') || 'Select City'}</option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+                {/* Hidden input for react-hook-form */}
+                <input
+                  type="hidden"
                   {...register('city')}
-                  className={errors.city ? 'border-red-500' : ''}
                 />
                 {errors.city && (
                   <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
@@ -246,32 +314,19 @@ const Checkout = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {t('checkout.form.zipCode')}
-                </label>
-                <Input
-                  {...register('zipCode')}
-                  className={errors.zipCode ? 'border-red-500' : ''}
-                />
-                {errors.zipCode && (
-                  <p className="text-red-500 text-sm mt-1">{errors.zipCode.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {t('checkout.form.country')}
-                </label>
-                <Input
-                  {...register('country')}
-                  className={errors.country ? 'border-red-500' : ''}
-                />
-                {errors.country && (
-                  <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('checkout.form.whatsappNumber') || 'WhatsApp Number'}
+              </label>
+              <Input
+                type="tel"
+                {...register('whatsappNumber')}
+                className={errors.whatsappNumber ? 'border-red-500' : ''}
+                placeholder={t('checkout.form.whatsappPlaceholder') || 'Auto-filled from phone number'}
+              />
+              {errors.whatsappNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.whatsappNumber.message}</p>
+              )}
             </div>
 
             <div>
@@ -305,13 +360,21 @@ const Checkout = () => {
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between">
                   <span>{item.name} x {item.quantity}</span>
-                  <span>{formatCurrency(item.price * item.quantity)}</span>
+                  <span>{formatCurrency(getItemPrice(item) * item.quantity)}</span>
                 </div>
               ))}
-              <div className="border-t pt-4">
-                <div className="flex justify-between font-semibold">
-                  <span>{t('checkout.summary.total')}</span>
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span>{t('checkout.summary.subtotal') || 'Subtotal'}</span>
                   <span>{formatCurrency(totalAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('checkout.summary.delivery') || 'Delivery'}</span>
+                  <span>{formatCurrency(deliveryPrice)}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                  <span>{t('checkout.summary.total')}</span>
+                  <span>{formatCurrency(totalWithDelivery)}</span>
                 </div>
               </div>
             </div>

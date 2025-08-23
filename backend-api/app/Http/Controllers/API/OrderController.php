@@ -79,6 +79,7 @@ class OrderController extends Controller
             'customer_phone' => 'required|string',
             'shipping_address' => 'required|string',
             'payment_method' => ['required', Rule::in(['cash', 'massarat', 'paypal'])],
+            'delivery_price' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -95,6 +96,7 @@ class OrderController extends Controller
                 'customer_phone' => $validated['customer_phone'],
                 'shipping_address' => $validated['shipping_address'],
                 'payment_method' => $validated['payment_method'],
+                'delivery_price' => $validated['delivery_price'] ?? 0,
                 'notes' => $validated['notes'] ?? null,
                 'total_amount' => 0,
                 'payment_status' => 'pending',
@@ -131,7 +133,7 @@ class OrderController extends Controller
 
             $order->update([
                 'is_wholesale' => $isWholesale,
-                'total_amount' => $totalAmount
+                'total_amount' => $totalAmount + ($validated['delivery_price'] ?? 0)
             ]);
 
             DB::commit();
@@ -178,6 +180,7 @@ class OrderController extends Controller
             'customer_email' => 'required|email',
             'customer_phone' => 'required|string',
             'shipping_address' => 'required|string',
+            'delivery_price' => 'nullable|numeric|min:0',
             'order_status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
             'payment_status' => ['required', Rule::in(['pending', 'paid', 'failed'])],
             'notes' => 'nullable|string',
