@@ -423,7 +423,10 @@ const Products = () => {
               <tr>
                 <th className="px-6 py-3 text-left">
                   <button
-                    onClick={(e) => handleSelectAll((e.target as HTMLInputElement).checked)}
+                    onClick={() => {
+                      const isAllSelected = selectedProducts.length === products?.data?.length && products?.data?.length > 0;
+                      handleSelectAll(!isAllSelected);
+                    }}
                     className="flex items-center"
                   >
                     {selectedProducts.length === products?.data?.length && products?.data?.length > 0 ? (
