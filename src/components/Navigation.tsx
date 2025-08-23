@@ -32,7 +32,7 @@ const Navigation = () => {
 
             {user ? (
               <div className="flex items-center space-x-4">
-                {user.role === 'admin' && (
+                {(user.roles?.includes('Admin') || user.roles?.includes('Super Admin')) && (
                   <Link to="/dashboard" className="text-gray-600 hover:text-indigo-600">
                     Dashboard
                   </Link>
@@ -73,4 +73,4 @@ const Navigation = () => {
   );
 };
 
-export default Navigation; 
+export default Navigation;

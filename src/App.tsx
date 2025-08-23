@@ -8,7 +8,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Products from './pages/Products';
-import Categories from './components/Categories';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Login from './pages/auth/Login';
@@ -44,7 +43,6 @@ function App() {
                 <Route path="/" element={<Navbar />}>
                   <Route index element={<Index />} />
                   <Route path="products" element={<Products />} />
-                  <Route path="categories" element={<Categories />} />
                   <Route path="cart" element={<Cart />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="login" element={<Login />} />

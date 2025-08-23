@@ -53,9 +53,11 @@ const Navbar = () => {
                   {t('nav.products')}
                 </Link>
 
-                <Link to="/categories" className="text-gray-600 hover:text-gray-900">
-                  {t('nav.categories')}
-                </Link>
+                {(user?.roles?.includes('Admin') || user?.roles?.includes('Super Admin')) && (
+                  <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+                    {t('nav.dashboard')}
+                  </Link>
+                )}
 
                 <Link to="/cart" className="relative">
                   <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-gray-900" />
@@ -81,11 +83,11 @@ const Navbar = () => {
                     <Link to="/my-orders" className="text-gray-600 hover:text-gray-900">
                       {t('nav.orders')}
                     </Link>
-                    {user.role === 'admin' && (
+                    {/* {(user?.roles?.includes('Admin') || user?.roles?.includes('Super Admin')) && (
                       <Link to="/dashboard">
                         <Button variant="outline">{t('nav.dashboard')}</Button>
                       </Link>
-                    )}
+                    )} */}
                     <Button
                       variant="ghost"
                       onClick={logout}
@@ -155,14 +157,6 @@ const Navbar = () => {
                       {t('nav.products')}
                     </Link>
 
-                    <Link
-                      to="/categories"
-                      className="text-gray-600 hover:text-gray-900 py-2 w-full"
-                      onClick={closeMenu}
-                    >
-                      {t('nav.categories')}
-                    </Link>
-
                     {user && (
                       <Link
                         to="/my-orders"
@@ -173,7 +167,7 @@ const Navbar = () => {
                       </Link>
                     )}
 
-                    {user?.role === 'admin' && (
+                    {(user?.roles?.includes('Admin') || user?.roles?.includes('Super Admin')) && (
                       <Link to="/dashboard" onClick={closeMenu} className="w-full">
                         <Button variant="outline" className={`w-full ${language === 'ar' ? 'justify-end' : 'justify-start'}`}>
                           {t('nav.dashboard')}
