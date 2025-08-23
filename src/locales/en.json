@@ -78,6 +78,9 @@
     "stock": "Stock",
     "allCategories": "All Categories",
     "noProducts": "No products found",
+    "featuredProducts": "Featured Products",
+    "featuredDescription": "Discover our premium selection of dates and traditional products",
+    "viewAllProducts": "View All Products",
     "categories": {
       "all": "All Categories",
       "dates": "Dates",

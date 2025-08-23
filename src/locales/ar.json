@@ -81,6 +81,9 @@
     "stock": "المخزون",
     "allCategories": "جميع التصنيفات",
     "noProducts": "لم يتم العثور على منتجات",
+    "featuredProducts": "المنتجات المميزة",
+    "featuredDescription": "اكتشف مجموعتنا المميزة من التمور والمنتجات التقليدية",
+    "viewAllProducts": "عرض جميع المنتجات",
     "categories": {
       "all": "جميع التصنيفات",
       "dates": "التمور",
