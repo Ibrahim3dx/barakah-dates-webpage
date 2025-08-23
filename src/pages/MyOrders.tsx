@@ -23,7 +23,7 @@ interface OrderItem {
     id: number;
     name: string;
     retail_price: string;
-  };
+  } | null;
 }
 
 interface Order {
@@ -181,7 +181,9 @@ const MyOrders = () => {
                         {order.items.map((item) => (
                           <div key={item.id} className="flex justify-between items-start p-4 bg-gray-50 rounded-lg border border-gray-100">
                             <div className="flex-1 min-w-0 pe-4">
-                              <p className="font-medium text-gray-900 mb-2 leading-tight">{item.product.name}</p>
+                              <p className="font-medium text-gray-900 mb-2 leading-tight">
+                                {item.product?.name || t('order.myOrders.productUnavailable')}
+                              </p>
                               <div className="flex flex-wrap items-center gap-3">
                                 <p className="text-sm text-gray-600">
                                   {t('order.myOrders.quantity')}: <span className="font-medium">{item.quantity}</span>

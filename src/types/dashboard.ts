@@ -1,15 +1,30 @@
 export interface Order {
   id: number;
+  order_number?: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   shipping_address: string;
   total_amount: number;
+  payment_method?: string;
   order_status: 'pending' | 'processing' | 'completed' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'failed';
   notes?: string;
   created_at: string;
   updated_at: string;
+  items?: OrderItem[];
+}
+
+export interface OrderItem {
+  id: number;
+  quantity: number;
+  unit_price: string;
+  is_wholesale: boolean;
+  product: {
+    id: number;
+    name: string;
+    retail_price: string;
+  } | null;
 }
 
 export interface Product {

@@ -195,7 +195,8 @@
       "shippingAddress": "عنوان الشحن",
       "phone": "الهاتف",
       "email": "البريد الإلكتروني",
-      "wholesale": "جملة"
+      "wholesale": "جملة",
+      "productUnavailable": "المنتج غير متوفر"
     },
     "confirmation": {
       "title": "تم تأكيد الطلب",
@@ -444,6 +445,7 @@
       "actions": "الإجراءات",
       "view": "عرض",
       "edit": "تعديل",
+      "print": "طباعة الفاتورة",
       "loading": "جاري التحميل...",
       "no_orders": "لم يتم العثور على طلبات",
       "paid": "مدفوع",

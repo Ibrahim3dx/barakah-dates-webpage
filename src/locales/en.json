@@ -189,7 +189,8 @@
       "shippingAddress": "Shipping Address",
       "phone": "Phone",
       "email": "Email",
-      "wholesale": "Wholesale"
+      "wholesale": "Wholesale",
+      "productUnavailable": "Product no longer available"
     },
     "confirmation": {
       "title": "Order Confirmed",
@@ -446,6 +447,7 @@
       "actions": "Actions",
       "view": "View",
       "edit": "Edit",
+      "print": "Print Invoice",
       "loading": "Loading...",
       "no_orders": "No orders found",
       "paid": "Paid",
