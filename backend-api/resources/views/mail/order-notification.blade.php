@@ -12,6 +12,8 @@
             padding: 0;
             background-color: #f4f4f4;
             color: #333;
+            direction: rtl;
+            text-align: right;
         }
         .container {
             max-width: 800px;
@@ -32,12 +34,14 @@
         .section {
             margin: 20px 0;
             padding: 15px;
-            border-left: 4px solid #2c5530;
+            border-right: 4px solid #2c5530;
             background: #f9f9f9;
+            text-align: right;
         }
         .section h3 {
             margin: 0 0 10px 0;
             color: #2c5530;
+            text-align: right;
         }
         .order-items {
             background: white;
@@ -47,6 +51,7 @@
         .item {
             padding: 10px;
             border-bottom: 1px solid #eee;
+            text-align: right;
         }
         .item:last-child {
             border-bottom: none;
@@ -89,6 +94,12 @@
             border-radius: 4px;
             margin: 20px 0;
             text-align: center;
+            font-weight: bold;
+        }
+        p, div {
+            text-align: right;
+        }
+        strong {
             font-weight: bold;
         }
     </style>

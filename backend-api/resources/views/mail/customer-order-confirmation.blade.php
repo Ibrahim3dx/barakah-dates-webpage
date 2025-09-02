@@ -12,6 +12,8 @@
             padding: 0;
             background-color: #f4f4f4;
             color: #333;
+            direction: rtl;
+            text-align: right;
         }
         .container {
             max-width: 800px;
@@ -41,12 +43,14 @@
         .section {
             margin: 20px 0;
             padding: 15px;
-            border-left: 4px solid #2c5530;
+            border-right: 4px solid #2c5530;
             background: #f9f9f9;
+            text-align: right;
         }
         .section h3 {
             margin: 0 0 10px 0;
             color: #2c5530;
+            text-align: right;
         }
         .order-items {
             background: white;
@@ -56,6 +60,7 @@
         .item {
             padding: 10px;
             border-bottom: 1px solid #eee;
+            text-align: right;
         }
         .item:last-child {
             border-bottom: none;
@@ -77,6 +82,7 @@
             padding: 15px;
             border-radius: 4px;
             margin: 20px 0;
+            text-align: right;
         }
         .footer {
             text-align: center;
@@ -98,6 +104,12 @@
         .processing-notice h3 {
             margin: 0 0 10px 0;
             color: #004080;
+        }
+        p, div {
+            text-align: right;
+        }
+        strong {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -157,7 +169,7 @@
 
         <div class="contact-info">
             <h3>📞 معلومات الاتصال</h3>
-            <p><strong>هاتف:</strong> +218 926537947</p>
+            <p><strong>هاتف:</strong> +218 910911909</p>
             <p><strong>البريد الإلكتروني:</strong> orders@albarakadates.com</p>
             <p>لأي استفسارات حول طلبك، يرجى الاتصال بنا مع ذكر رقم الطلب.</p>
         </div>
