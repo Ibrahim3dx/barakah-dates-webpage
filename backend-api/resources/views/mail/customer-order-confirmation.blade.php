@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد الطلب - Order Confirmation #{{ $order->id }}</title>
+    <title>تأكيد الطلب #{{ $order->id }}</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -104,40 +104,39 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>شكراً لطلبك! - Thank You for Your Order!</h1>
-            <p>البركة للتمور ومنتجات النخيل - Al Baraka Dates</p>
+            <h1>شكراً لطلبك!</h1>
+            <p>البركة للتمور ومنتجات النخيل</p>
         </div>
 
         <div class="thank-you">
-            <h2>تم استلام طلبك بنجاح - Your Order Has Been Received Successfully</h2>
-            <p>رقم طلبك: <strong>#{{ $order->id }}</strong> | Your Order Number: <strong>#{{ $order->id }}</strong></p>
+            <h2>تم استلام طلبك بنجاح</h2>
+            <p>رقم طلبك: <strong>#{{ $order->id }}</strong></p>
         </div>
 
         <div class="processing-notice">
-            <h3>🔄 طلبك قيد المعالجة - Your Order is Being Processed</h3>
+            <h3>🔄 طلبك قيد المعالجة</h3>
             <p><strong>سنتواصل معك قريباً مع تفاصيل التسليم وموعد الوصول المتوقع.</strong></p>
-            <p><strong>We will contact you soon with delivery details and estimated arrival time.</strong></p>
         </div>
 
         <div class="section">
-            <h3>تفاصيل الطلب - Order Details</h3>
-            <p><strong>تاريخ الطلب / Order Date:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
-            <p><strong>طريقة الدفع / Payment Method:</strong> {{ $paymentMethod }}</p>
-            <p><strong>عنوان التسليم / Delivery Address:</strong> {{ $order->shipping_address }}</p>
+            <h3>تفاصيل الطلب</h3>
+            <p><strong>تاريخ الطلب:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+            <p><strong>طريقة الدفع:</strong> {{ $paymentMethod }}</p>
+            <p><strong>عنوان التسليم:</strong> {{ $order->shipping_address }}</p>
         </div>
 
         <div class="section">
-            <h3>المنتجات المطلوبة - Ordered Products</h3>
+            <h3>المنتجات المطلوبة</h3>
             <div class="order-items">
                 @foreach($order->items as $item)
                 <div class="item">
                     <strong>{{ $item->product->name }}</strong><br>
                     <small>
-                        الكمية / Quantity: {{ $item->quantity }} |
-                        السعر / Price: {{ number_format($item->unit_price, 2) }} ريال |
-                        المجموع / Total: {{ number_format($item->quantity * $item->unit_price, 2) }} ريال
+                        الكمية: {{ $item->quantity }} |
+                        السعر: {{ number_format($item->unit_price, 2) }} دينار |
+                        المجموع: {{ number_format($item->quantity * $item->unit_price, 2) }} دينار
                         @if($item->is_wholesale)
-                            <span style="color: #28a745;">(سعر الجملة - Wholesale Price)</span>
+                            <span style="color: #28a745;">(سعر الجملة)</span>
                         @endif
                     </small>
                 </div>
@@ -146,28 +145,26 @@
         </div>
 
         <div class="total">
-            المبلغ الإجمالي / Total Amount: {{ number_format($order->total_amount, 2) }} ريال سعودي
+            المبلغ الإجمالي: {{ number_format($order->total_amount, 2) }} دينار ليبي
         </div>
 
         @if($order->notes)
         <div class="section">
-            <h3>ملاحظاتك - Your Notes</h3>
+            <h3>ملاحظاتك</h3>
             <p>{{ $order->notes }}</p>
         </div>
         @endif
 
         <div class="contact-info">
-            <h3>📞 معلومات الاتصال - Contact Information</h3>
-            <p><strong>هاتف / Phone:</strong> +218 926537947</p>
-            <p><strong>البريد الإلكتروني / Email:</strong> orders@albarakadates.com</p>
+            <h3>📞 معلومات الاتصال</h3>
+            <p><strong>هاتف:</strong> +218 926537947</p>
+            <p><strong>البريد الإلكتروني:</strong> orders@albarakadates.com</p>
             <p>لأي استفسارات حول طلبك، يرجى الاتصال بنا مع ذكر رقم الطلب.</p>
-            <p>For any inquiries about your order, please contact us with your order number.</p>
         </div>
 
         <div class="footer">
             <p>شكراً لاختياركم البركة للتمور ومنتجات النخيل</p>
-            <p>Thank you for choosing Al Baraka Dates</p>
-            <p>&copy; {{ date('Y') }} البركة للتمور ومنتجات النخيل - Al Baraka Dates</p>
+            <p>&copy; {{ date('Y') }} البركة للتمور ومنتجات النخيل</p>
         </div>
     </div>
 </body>

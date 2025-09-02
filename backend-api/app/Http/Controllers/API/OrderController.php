@@ -207,24 +207,24 @@ class OrderController extends Controller
     private function sendOrderNotificationEmail(Order $order)
     {
         try {
-            $subject = 'طلب جديد - New Order #' . $order->id . ' | البركة للتمور';
+            $subject = 'طلب جديد #' . $order->id . ' | البركة للتمور';
             $ordersEmail = config('services.orders.email', 'ibrahim3dx@gmail.com');
 
             $order->load(['items.product']);
 
             // Prepare data for the email template
             $paymentMethod = match($order->payment_method) {
-                'cash' => 'نقداً عند التسليم - Cash on Delivery',
-                'massarat' => 'مسارات - Massarat Bank Transfer',
-                'paypal' => 'باي بال - PayPal',
+                'cash' => 'نقداً عند التسليم',
+                'massarat' => 'مسارات',
+                'paypal' => 'باي بال',
                 default => $order->payment_method
             };
 
             $orderStatus = match($order->order_status) {
-                'pending' => 'في الانتظار - Pending',
-                'processing' => 'قيد المعالجة - Processing',
-                'completed' => 'مكتمل - Completed',
-                'cancelled' => 'ملغي - Cancelled',
+                'pending' => 'في الانتظار',
+                'processing' => 'قيد المعالجة',
+                'completed' => 'مكتمل',
+                'cancelled' => 'ملغي',
                 default => $order->order_status
             };
 
@@ -253,15 +253,15 @@ class OrderController extends Controller
     private function sendCustomerOrderConfirmation(Order $order)
     {
         try {
-            $subject = 'تأكيد طلبك - Order Confirmation #' . $order->id . ' | البركة للتمور';
+            $subject = 'تأكيد طلبك #' . $order->id . ' | البركة للتمور';
 
             $order->load(['items.product']);
 
             // Prepare data for the email template
             $paymentMethod = match($order->payment_method) {
-                'cash' => 'نقداً عند التسليم - Cash on Delivery',
-                // 'massarat' => 'مسارات - Massarat Bank Transfer',
-                // 'paypal' => 'باي بال - PayPal',
+                'cash' => 'نقداً عند التسليم',
+                'massarat' => 'مسارات',
+                'paypal' => 'باي بال',
                 default => $order->payment_method
             };
 

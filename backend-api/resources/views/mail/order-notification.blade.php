@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب جديد - New Order #{{ $order->id }}</title>
+    <title>طلب جديد #{{ $order->id }}</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -96,44 +96,43 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>طلب جديد - New Order #{{ $order->id }}</h1>
-            <p>البركة للتمور ومنتجات النخيل - Al Baraka Dates</p>
+            <h1>طلب جديد #{{ $order->id }}</h1>
+            <p>البركة للتمور ومنتجات النخيل</p>
         </div>
 
         <div class="processing-notice">
             <p>طلبك قيد المعالجة وسنتواصل معك قريباً.</p>
-            <p>Your order is being processed and we will contact you soon.</p>
         </div>
 
         <div class="section">
-            <h3>معلومات الطلب - Order Information</h3>
-            <p><strong>رقم الطلب / Order Number:</strong> #{{ $order->id }}</p>
-            <p><strong>تاريخ الطلب / Order Date:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
-            <p><strong>حالة الطلب / Order Status:</strong>
+            <h3>معلومات الطلب</h3>
+            <p><strong>رقم الطلب:</strong> #{{ $order->id }}</p>
+            <p><strong>تاريخ الطلب:</strong> {{ $order->created_at->format('Y-m-d H:i:s') }}</p>
+            <p><strong>حالة الطلب:</strong>
                 <span class="status-badge status-pending">{{ $orderStatus }}</span>
             </p>
         </div>
 
         <div class="section">
-            <h3>بيانات العميل - Customer Information</h3>
-            <p><strong>الاسم / Name:</strong> {{ $order->customer_name }}</p>
-            <p><strong>البريد الإلكتروني / Email:</strong> {{ $order->customer_email }}</p>
-            <p><strong>رقم الهاتف / Phone:</strong> {{ $order->customer_phone }}</p>
-            <p><strong>عنوان التسليم / Delivery Address:</strong> {{ $order->shipping_address }}</p>
+            <h3>بيانات العميل</h3>
+            <p><strong>الاسم:</strong> {{ $order->customer_name }}</p>
+            <p><strong>البريد الإلكتروني:</strong> {{ $order->customer_email }}</p>
+            <p><strong>رقم الهاتف:</strong> {{ $order->customer_phone }}</p>
+            <p><strong>عنوان التسليم:</strong> {{ $order->shipping_address }}</p>
         </div>
 
         <div class="section">
-            <h3>تفاصيل المنتجات - Product Details</h3>
+            <h3>تفاصيل المنتجات</h3>
             <div class="order-items">
                 @foreach($order->items as $item)
                 <div class="item">
                     <strong>{{ $item->product->name }}</strong><br>
                     <small>
-                        الكمية / Quantity: {{ $item->quantity }} |
-                        السعر / Price: {{ number_format($item->unit_price, 2) }} ريال |
-                        المجموع / Total: {{ number_format($item->quantity * $item->unit_price, 2) }} ريال
+                        الكمية: {{ $item->quantity }} |
+                        السعر: {{ number_format($item->unit_price, 2) }} دينار |
+                        المجموع: {{ number_format($item->quantity * $item->unit_price, 2) }} دينار
                         @if($item->is_wholesale)
-                            <span style="color: #28a745;">(سعر الجملة - Wholesale Price)</span>
+                            <span style="color: #28a745;">(سعر الجملة)</span>
                         @endif
                     </small>
                 </div>
@@ -142,31 +141,30 @@
         </div>
 
         <div class="total">
-            المبلغ الإجمالي / Total Amount: {{ number_format($order->total_amount, 2) }} ريال سعودي
+            المبلغ الإجمالي: {{ number_format($order->total_amount, 2) }} دينار ليبي
         </div>
 
         <div class="section">
-            <h3>معلومات الدفع والتسليم - Payment & Delivery Information</h3>
-            <p><strong>طريقة الدفع / Payment Method:</strong> {{ $paymentMethod }}</p>
-            <p><strong>نوع الطلب / Order Type:</strong>
-                {{ $order->is_wholesale ? 'طلب جملة - Wholesale Order' : 'طلب تجزئة - Retail Order' }}
+            <h3>معلومات الدفع والتسليم</h3>
+            <p><strong>طريقة الدفع:</strong> {{ $paymentMethod }}</p>
+            <p><strong>نوع الطلب:</strong>
+                {{ $order->is_wholesale ? 'طلب جملة' : 'طلب تجزئة' }}
             </p>
             @if($order->delivery_price > 0)
-            <p><strong>رسوم التوصيل / Delivery Fee:</strong> {{ number_format($order->delivery_price, 2) }} ريال</p>
+            <p><strong>رسوم التوصيل:</strong> {{ number_format($order->delivery_price, 2) }} دينار</p>
             @endif
         </div>
 
         @if($order->notes)
         <div class="section">
-            <h3>ملاحظات العميل - Customer Notes</h3>
+            <h3>ملاحظات العميل</h3>
             <p>{{ $order->notes }}</p>
         </div>
         @endif
 
         <div class="footer">
             <p>تم إنشاء هذا البريد الإلكتروني تلقائياً من نظام البركة للتمور</p>
-            <p>This email was automatically generated from Al Baraka Dates system</p>
-            <p>&copy; {{ date('Y') }} البركة للتمور ومنتجات النخيل - Al Baraka Dates</p>
+            <p>&copy; {{ date('Y') }} البركة للتمور ومنتجات النخيل</p>
         </div>
     </div>
 </body>
