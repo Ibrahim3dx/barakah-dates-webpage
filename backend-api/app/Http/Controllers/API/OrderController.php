@@ -285,3 +285,5 @@ class OrderController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+    }
+}
