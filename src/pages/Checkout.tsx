@@ -142,19 +142,12 @@ const Checkout = () => {
       if (response.data) {
         console.log('Order created successfully:', response.data);
 
-        // Check if there's a WhatsApp URL for manual messaging
-        if (response.data.whatsapp_url) {
-          // Open WhatsApp URL in a new tab
-          window.open(response.data.whatsapp_url, '_blank');
-        }
-
         // Clear the cart and redirect to order confirmation
         clearCart();
         navigate('/order-confirmation', {
           state: {
             orderId: response.data.id,
-            orderNumber: response.data.order_number || response.data.id,
-            whatsappUrl: response.data.whatsapp_url
+            orderNumber: response.data.order_number || response.data.id
           }
         });
         toast.success(t('checkout.success'));

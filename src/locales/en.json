@@ -201,10 +201,10 @@
       "total": "Total Amount",
       "continueShopping": "Continue Shopping",
       "viewOrders": "View Orders",
-      "whatsapp": {
-        "title": "Send Order Details via WhatsApp",
-        "message": "Click the button below to send your order details via WhatsApp to complete the process.",
-        "button": "Open WhatsApp"
+      "processing": {
+        "title": "Order Under Processing",
+        "message": "Your order has been received and is currently being processed by our team.",
+        "contact": "We will contact you soon with updates and delivery details."
       }
     }
   },

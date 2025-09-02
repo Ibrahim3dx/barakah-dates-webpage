@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\WhatsAppService;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Validation\Rule;
@@ -14,13 +13,6 @@ use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    private WhatsAppService $whatsAppService;
-
-    public function __construct(WhatsAppService $whatsAppService)
-    {
-        $this->whatsAppService = $whatsAppService;
-    }
-
     /**
      * Display a listing of the resource.
      */
@@ -138,18 +130,13 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Send WhatsApp notification or get WhatsApp URL
-            $whatsappResult = $this->whatsAppService->sendOrderNotification($order);
-
-            // Send email notification to sales team
+            // Send email notification to orders team
             $this->sendOrderNotificationEmail($order);
 
-            $response = $order->load('items.product');
+            // Send confirmation email to customer
+            $this->sendCustomerOrderConfirmation($order);
 
-            // If WhatsApp service is disabled, include the WhatsApp URL in response
-            if (is_string($whatsappResult)) {
-                $response->whatsapp_url = $whatsappResult;
-            }
+            $response = $order->load('items.product');
 
             return response()->json($response, 201);
 
@@ -215,16 +202,38 @@ class OrderController extends Controller
     }
 
     /**
-     * Send order notification email to sales team
+     * Send order notification email to orders team
      */
     private function sendOrderNotificationEmail(Order $order)
     {
         try {
             $subject = 'طلب جديد - New Order #' . $order->id . ' | البركة للتمور';
-            $emailContent = $this->formatOrderNotificationEmail($order);
+            $ordersEmail = config('services.orders.email', 'orders@albarakadates.com');
 
-            Mail::raw($emailContent, function ($message) use ($subject) {
-                $message->to('sales@albarakadates.com')
+            $order->load(['items.product']);
+
+            // Prepare data for the email template
+            $paymentMethod = match($order->payment_method) {
+                'cash' => 'نقداً عند التسليم - Cash on Delivery',
+                'massarat' => 'مسارات - Massarat Bank Transfer',
+                'paypal' => 'باي بال - PayPal',
+                default => $order->payment_method
+            };
+
+            $orderStatus = match($order->order_status) {
+                'pending' => 'في الانتظار - Pending',
+                'processing' => 'قيد المعالجة - Processing',
+                'completed' => 'مكتمل - Completed',
+                'cancelled' => 'ملغي - Cancelled',
+                default => $order->order_status
+            };
+
+            Mail::send('mail.order-notification', [
+                'order' => $order,
+                'paymentMethod' => $paymentMethod,
+                'orderStatus' => $orderStatus
+            ], function ($message) use ($subject, $ordersEmail) {
+                $message->to($ordersEmail)
                        ->subject($subject)
                        ->from(config('mail.from.address'), config('mail.from.name'));
             });
@@ -239,77 +248,40 @@ class OrderController extends Controller
     }
 
     /**
-     * Format order notification email content in Arabic
+     * Send order confirmation email to customer
      */
-    private function formatOrderNotificationEmail(Order $order): string
+    private function sendCustomerOrderConfirmation(Order $order)
     {
-        $order->load(['items.product']);
+        try {
+            $subject = 'تأكيد طلبك - Order Confirmation #' . $order->id . ' | البركة للتمور';
 
-        $paymentMethodArabic = match($order->payment_method) {
-            'cash' => 'نقداً عند التسليم',
-            'massarat' => 'مسارات (تحويل بنكي)',
-            'paypal' => 'باي بال',
-            default => $order->payment_method
-        };
+            $order->load(['items.product']);
 
-        $statusArabic = match($order->order_status) {
-            'pending' => 'في الانتظار',
-            'processing' => 'قيد المعالجة',
-            'completed' => 'مكتمل',
-            'cancelled' => 'ملغي',
-            default => $order->order_status
-        };
+            // Prepare data for the email template
+            $paymentMethod = match($order->payment_method) {
+                'cash' => 'نقداً عند التسليم - Cash on Delivery',
+                // 'massarat' => 'مسارات - Massarat Bank Transfer',
+                // 'paypal' => 'باي بال - PayPal',
+                default => $order->payment_method
+            };
 
-        $paymentStatusArabic = match($order->payment_status) {
-            'pending' => 'في الانتظار',
-            'paid' => 'مدفوع',
-            'failed' => 'فشل',
-            default => $order->payment_status
-        };
+            Mail::send('mail.customer-order-confirmation', [
+                'order' => $order,
+                'paymentMethod' => $paymentMethod
+            ], function ($message) use ($subject, $order) {
+                $message->to($order->customer_email, $order->customer_name)
+                       ->subject($subject)
+                       ->from(config('mail.from.address'), config('mail.from.name'));
+            });
 
-        $content = "=== طلب جديد من البركة للتمور ===\n\n";
-        $content .= "رقم الطلب: #{$order->id}\n";
-        $content .= "تاريخ الطلب: " . $order->created_at->format('Y-m-d H:i:s') . "\n\n";
-
-        $content .= "=== بيانات العميل ===\n";
-        $content .= "الاسم: {$order->customer_name}\n";
-        $content .= "البريد الإلكتروني: {$order->customer_email}\n";
-        $content .= "رقم الهاتف: {$order->customer_phone}\n";
-        $content .= "عنوان التسليم: {$order->shipping_address}\n\n";
-
-        $content .= "=== تفاصيل الطلب ===\n";
-        foreach ($order->items as $item) {
-            $content .= "• {$item->product->name}\n";
-            $content .= "  الكمية: {$item->quantity}\n";
-            $content .= "  السعر للوحدة: {$item->unit_price} ريال\n";
-            $content .= "  المجموع: " . ($item->quantity * $item->unit_price) . " ريال\n";
-            if ($item->is_wholesale) {
-                $content .= "  (سعر الجملة)\n";
-            }
-            $content .= "\n";
+            Log::info('Customer order confirmation email sent', [
+                'order_id' => $order->id,
+                'customer_email' => $order->customer_email
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send customer order confirmation email', [
+                'order_id' => $order->id,
+                'customer_email' => $order->customer_email,
+                'error' => $e->getMessage()
+            ]);
         }
-
-        $content .= "=== ملخص الطلب ===\n";
-        $content .= "المبلغ الإجمالي: {$order->total_amount} ريال سعودي\n";
-        $content .= "طريقة الدفع: {$paymentMethodArabic}\n";
-        $content .= "حالة الطلب: {$statusArabic}\n";
-        $content .= "حالة الدفع: {$paymentStatusArabic}\n";
-
-        if ($order->is_wholesale) {
-            $content .= "نوع الطلب: طلب جملة\n";
-        }
-
-        if ($order->notes) {
-            $content .= "\n=== ملاحظات العميل ===\n";
-            $content .= $order->notes . "\n";
-        }
-
-        $content .= "\n---\n";
-        $content .= "يرجى معالجة هذا الطلب في أقرب وقت ممكن.\n";
-        $content .= "للاطلاع على تفاصيل أكثر، يرجى تسجيل الدخول إلى لوحة التحكم.\n\n";
-        $content .= "فريق البركة للتمور ومنتجات النخيل\n";
-        $content .= "تم إنشاء هذا البريد تلقائياً من نظام إدارة الطلبات.";
-
-        return $content;
-    }
-}

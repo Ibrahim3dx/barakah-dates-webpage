@@ -54,4 +54,8 @@ return [
         'receiver_number' => env('ORDER_MESSAGE_RECIVER_NUMBER', ''),
     ],
 
+    'orders' => [
+        'email' => env('ORDERS_EMAIL', 'ibrahim3dx@gmail.com'),
+    ],
+
 ];

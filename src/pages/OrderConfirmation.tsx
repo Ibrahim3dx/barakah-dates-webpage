@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { useLanguage } from '../contexts/LanguageContext';
-import { CheckCircle, MessageCircle } from 'lucide-react';
+import { CheckCircle, Mail } from 'lucide-react';
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
-  const { orderId, orderNumber, whatsappUrl } = location.state || {};
+  const { orderId, orderNumber } = location.state || {};
 
   useEffect(() => {
     // If no order details are present, redirect to home
@@ -20,12 +20,6 @@ const OrderConfirmation = () => {
   if (!orderId) {
     return null;
   }
-
-  const handleWhatsAppClick = () => {
-    if (whatsappUrl) {
-      window.open(whatsappUrl, '_blank');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -58,23 +52,18 @@ const OrderConfirmation = () => {
               </div>
             </div>
 
-            {whatsappUrl && (
-              <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center mb-3">
-                  <MessageCircle className="h-5 w-5 text-green-600 ml-2" />
-                  <span className="text-green-800 font-semibold">{t('order.confirmation.whatsapp.title')}</span>
-                </div>
-                <p className="text-green-700 text-sm mb-4 leading-relaxed">
-                  {t('order.confirmation.whatsapp.message')}
-                </p>
-                <Button
-                  onClick={handleWhatsAppClick}
-                  className="bg-green-600 hover:bg-green-700 text-white font-medium"
-                >
-                  {t('order.confirmation.whatsapp.button')}
-                </Button>
+            <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center mb-3">
+                <Mail className="h-5 w-5 text-blue-600 ml-2" />
+                <span className="text-blue-800 font-semibold">{t('order.confirmation.processing.title')}</span>
               </div>
-            )}
+              <p className="text-blue-700 text-sm mb-2 leading-relaxed">
+                {t('order.confirmation.processing.message')}
+              </p>
+              <p className="text-blue-600 text-sm font-medium">
+                {t('order.confirmation.processing.contact')}
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
