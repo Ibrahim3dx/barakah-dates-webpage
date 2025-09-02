@@ -208,7 +208,7 @@ class OrderController extends Controller
     {
         try {
             $subject = 'طلب جديد - New Order #' . $order->id . ' | البركة للتمور';
-            $ordersEmail = config('services.orders.email', 'orders@albarakadates.com');
+            $ordersEmail = config('services.orders.email', 'ibrahim3dx@gmail.com');
 
             $order->load(['items.product']);
 
