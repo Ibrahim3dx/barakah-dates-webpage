@@ -265,8 +265,8 @@ const Products = () => {
     );
   }
 
-  // Filter out inactive products (assuming 'active' property exists)
-  const activeProducts = response.data.filter((product: any) => product.active !== false);
+  // Filter out inactive and out-of-stock products
+  const visibleProducts = response.data.filter((product: any) => (product.active !== false) && (product.stock > 0));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -350,9 +350,9 @@ const Products = () => {
         )}
 
         {/* Products Grid */}
-        {!isLoading && activeProducts.length > 0 && (
+        {!isLoading && visibleProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <ProductCard 
                 key={product.id}
                 product={product}
