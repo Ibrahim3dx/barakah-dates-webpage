@@ -265,6 +265,9 @@ const Products = () => {
     );
   }
 
+  // Filter out inactive products (assuming 'active' property exists)
+  const activeProducts = response.data.filter((product: any) => product.active !== false);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -347,9 +350,9 @@ const Products = () => {
         )}
 
         {/* Products Grid */}
-        {!isLoading && response?.data.length > 0 && (
+        {!isLoading && activeProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {response.data.map((product) => (
+            {activeProducts.map((product) => (
               <ProductCard 
                 key={product.id}
                 product={product}
