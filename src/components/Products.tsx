@@ -121,6 +121,9 @@ const Products = () => {
     );
   }
 
+  // Only show products that are active and in stock
+  const visibleProducts = response.data.filter((product: any) => (product.active !== false) && (product.stock > 0));
+
   return (
     <section id="products" className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -134,7 +137,7 @@ const Products = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {response.data.map((product) => (
+          {visibleProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-lg border border-orange-200 shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
@@ -153,11 +156,6 @@ const Products = () => {
                   <span className="absolute top-3 right-3 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
                     {product.category.name}
                   </span>
-                )}
-                {product.stock <= 0 && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <span className="text-white font-medium">{t('products.outOfStock')}</span>
-                  </div>
                 )}
               </div>
 
