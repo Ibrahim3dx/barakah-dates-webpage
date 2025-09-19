@@ -24,6 +24,7 @@ interface Product {
   wholesale_price?: string;
   wholesale_threshold?: number;
   stock: number;
+  is_active: boolean;
   is_always_in_stock: boolean;
   category?: {
     id: number;
@@ -57,8 +58,8 @@ interface ApiResponse {
 }
 
 // Memoized ProductCard component to prevent unnecessary re-renders
-const ProductCard = memo(({ product, onAddToCart, t }: { 
-  product: Product; 
+const ProductCard = memo(({ product, onAddToCart, t }: {
+  product: Product;
   onAddToCart: (product: Product) => void;
   t: (key: string) => string;
 }) => {
@@ -172,17 +173,17 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
-  
+
   // Debounce search query to avoid too many API calls
   const debouncedSearchQuery = useDebounce(searchInput, 300);
-  
+
   const { addToCart } = useCart();
   const { t } = useLanguage();
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await api.get('/api/categories');
+      const response = await api.get('/api/categories?active=true');
       const data = response.data;
       // Return the data array from the paginated response
       return data.data || [];
@@ -197,6 +198,7 @@ const Products = () => {
       if (selectedCategory) params.append('category_id', selectedCategory.toString());
       params.append('page', currentPage.toString());
       params.append('per_page', pageSize.toString());
+      params.append('active', 'true'); // Filter for active products only
 
       const response = await api.get(`/api/products?${params.toString()}`);
       return response.data;
@@ -251,11 +253,6 @@ const Products = () => {
     );
   }
 
-  // Debug logs
-  console.log('Response:', response);
-  console.log('Response data:', response?.data);
-  console.log('Is array?', Array.isArray(response?.data));
-
   // Safety check for data
   if (!response?.data || !Array.isArray(response.data)) {
     return (
@@ -266,7 +263,7 @@ const Products = () => {
   }
 
   // Filter out inactive and out-of-stock products
-  const visibleProducts = response.data.filter((product: any) => (product.active !== false) && (product.stock > 0));
+  const visibleProducts = response.data.filter((product: Product) => product.is_active === true && product.stock > 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -353,7 +350,7 @@ const Products = () => {
         {!isLoading && visibleProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {visibleProducts.map((product) => (
-              <ProductCard 
+              <ProductCard
                 key={product.id}
                 product={product}
                 onAddToCart={handleAddToCart}

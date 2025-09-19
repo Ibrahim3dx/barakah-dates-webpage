@@ -54,7 +54,11 @@ const ProductsView = () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (categoryFilter) params.append('category', categoryFilter);
-      if (statusFilter) params.append('status', statusFilter);
+      if (statusFilter === 'active') {
+        params.append('active', 'true');
+      } else if (statusFilter === 'inactive') {
+        params.append('active', 'false');
+      }
 
       const response = await api.get(`/api/products?${params.toString()}`);
       return response.data;

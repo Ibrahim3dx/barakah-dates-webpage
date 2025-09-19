@@ -22,6 +22,7 @@ interface Product {
   wholesale_price?: string;
   wholesale_threshold?: number;
   stock: number;
+  is_active: boolean;
   category?: {
     id: number;
     name: string;
@@ -56,8 +57,8 @@ const Products = () => {
   const { data: response, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ['featured-products'],
     queryFn: async () => {
-      // Fetch top 3 products
-      const response = await api.get('/api/products?per_page=4');
+      // Fetch top 4 active products
+      const response = await api.get('/api/products?per_page=4&active=true');
       return response.data;
     },
   });
@@ -122,7 +123,7 @@ const Products = () => {
   }
 
   // Only show products that are active and in stock
-  const visibleProducts = response.data.filter((product: any) => (product.active !== false) && (product.stock > 0));
+  const visibleProducts = response.data.filter((product: Product) => product.is_active === true && product.stock > 0);
 
   return (
     <section id="products" className="py-16 bg-gray-50">
