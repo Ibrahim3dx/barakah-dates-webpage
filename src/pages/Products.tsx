@@ -149,6 +149,154 @@ const ProductCard = memo(({ product, onAddToCart, t }: {
 
 ProductCard.displayName = 'ProductCard';
 
+// Memoized ProductsGrid component to optimize search performance
+const ProductsGrid = memo(({
+  debouncedSearchQuery,
+  selectedCategory,
+  currentPage,
+  pageSize,
+  setCurrentPage,
+  handleAddToCart,
+  t
+}: {
+  debouncedSearchQuery: string;
+  selectedCategory: number | null;
+  currentPage: number;
+  pageSize: number;
+  setCurrentPage: (page: number) => void;
+  handleAddToCart: (product: Product) => void;
+  t: (key: string) => string;
+}) => {
+  // Separate query for products data only
+  const { data: response, isLoading, error } = useQuery<ApiResponse>({
+    queryKey: ['products', debouncedSearchQuery, selectedCategory, currentPage, pageSize],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
+      if (selectedCategory) params.append('category_id', selectedCategory.toString());
+      params.append('page', currentPage.toString());
+      params.append('per_page', pageSize.toString());
+      params.append('active', 'true'); // Filter for active products only
+
+      const response = await api.get(`/api/products?${params.toString()}`);
+      return response.data;
+    },
+  });
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="text-red-500">Error loading products: {error.message}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check for data
+  if (!isLoading && (!response?.data || !Array.isArray(response.data))) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="text-gray-500">{t('products.noProducts')}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Filter out inactive and out-of-stock products
+  const visibleProducts = response?.data?.filter((product: Product) => product.is_active === true && product.stock > 0) || [];
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Loading State */}
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: pageSize }, (_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {/* No Products Message */}
+      {!isLoading && response?.data.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">{t('products.noProducts')}</p>
+          {debouncedSearchQuery && (
+            <p className="text-gray-400 text-sm mt-2">
+              {t('products.noSearchResults') || `No results found for "${debouncedSearchQuery}"`}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Products Grid */}
+      {!isLoading && visibleProducts.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {visibleProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={handleAddToCart}
+              t={t}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && response && response.last_page > 1 && (
+        <div className="mt-8 flex items-center justify-center">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage <= 1}
+              className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.previous') || 'Previous'}
+            </button>
+
+            <div className="flex items-center space-x-2">
+              {Array.from({ length: Math.min(5, response.last_page) }, (_, i) => {
+                const startPage = Math.max(1, Math.min(response.last_page - 4, currentPage - 2));
+                const pageNumber = startPage + i;
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      currentPage === pageNumber
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(Math.min(response.last_page, currentPage + 1))}
+              disabled={currentPage >= response.last_page}
+              className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.next') || 'Next'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Results Info */}
+      {!isLoading && response && response.total > 0 && (
+        <div className="mt-4 text-center text-sm text-gray-600">
+          {t('common.showing') || 'Showing'} {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, response.total)} {t('common.of') || 'of'} {response.total} {t('common.results') || 'results'}
+        </div>
+      )}
+    </div>
+  );
+});ProductsGrid.displayName = 'ProductsGrid';
+
 // Loading skeleton component
 const ProductSkeleton = () => (
   <div className="bg-white rounded-lg border border-orange-200 shadow-md overflow-hidden animate-pulse">
@@ -190,21 +338,6 @@ const Products = () => {
     },
   });
 
-  const { data: response, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: ['products', debouncedSearchQuery, selectedCategory, currentPage, pageSize],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
-      if (selectedCategory) params.append('category_id', selectedCategory.toString());
-      params.append('page', currentPage.toString());
-      params.append('per_page', pageSize.toString());
-      params.append('active', 'true'); // Filter for active products only
-
-      const response = await api.get(`/api/products?${params.toString()}`);
-      return response.data;
-    },
-  });
-
   const handleCategoryChange = useCallback((categoryId: number | null) => {
     setSelectedCategory(categoryId);
     setCurrentPage(1); // Reset to first page when changing category
@@ -236,34 +369,6 @@ const Products = () => {
     addToCart(cartProduct);
     toast.success(`${product.name} ${t('products.addedToCart')}`);
   }, [addToCart, t]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error loading products: {error.message}</div>
-      </div>
-    );
-  }
-
-  // Safety check for data
-  if (!response?.data || !Array.isArray(response.data)) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">{t('products.noProducts')}</div>
-      </div>
-    );
-  }
-
-  // Filter out inactive and out-of-stock products
-  const visibleProducts = response.data.filter((product: Product) => product.is_active === true && product.stock > 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -324,92 +429,15 @@ const Products = () => {
       </div>
 
       {/* Products Grid */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Loading State */}
-        {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: pageSize }, (_, i) => (
-              <ProductSkeleton key={i} />
-            ))}
-          </div>
-        )}
-
-        {/* No Products Message */}
-        {!isLoading && response?.data.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">{t('products.noProducts')}</p>
-            {debouncedSearchQuery && (
-              <p className="text-gray-400 text-sm mt-2">
-                {t('products.noSearchResults') || `No results found for "${debouncedSearchQuery}"`}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Products Grid */}
-        {!isLoading && visibleProducts.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={handleAddToCart}
-                t={t}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {response && response.last_page > 1 && (
-          <div className="mt-8 flex items-center justify-center">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage <= 1}
-                className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('common.previous') || 'Previous'}
-              </button>
-
-              <div className="flex items-center space-x-2">
-                {Array.from({ length: Math.min(5, response.last_page) }, (_, i) => {
-                  const startPage = Math.max(1, Math.min(response.last_page - 4, currentPage - 2));
-                  const pageNumber = startPage + i;
-                  return (
-                    <button
-                      key={pageNumber}
-                      onClick={() => setCurrentPage(pageNumber)}
-                      className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        currentPage === pageNumber
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-white text-orange-700 border border-orange-300 hover:bg-orange-50'
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage(Math.min(response.last_page, currentPage + 1))}
-                disabled={currentPage >= response.last_page}
-                className="px-4 py-2 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('common.next') || 'Next'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Results Info */}
-        {response && response.total > 0 && (
-          <div className="mt-4 text-center text-sm text-gray-600">
-            {t('common.showing') || 'Showing'} {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, response.total)} {t('common.of') || 'of'} {response.total} {t('common.results') || 'results'}
-          </div>
-        )}
-      </div>
+      <ProductsGrid
+        debouncedSearchQuery={debouncedSearchQuery}
+        selectedCategory={selectedCategory}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        setCurrentPage={setCurrentPage}
+        handleAddToCart={handleAddToCart}
+        t={t}
+      />
     </div>
   );
 };
